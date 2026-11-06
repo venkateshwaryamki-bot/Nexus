@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- NEXUS emblem: energy core inside an orbital ring with a tower spire (original artwork). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+    <path android:strokeColor="#27DFFF" android:strokeWidth="2.5" android:fillColor="#00000000"
+        android:pathData="M54,30 A24,24 0 1,1 53.99,30 Z" />
+    <path android:strokeColor="#9275FF" android:strokeWidth="1.5" android:fillColor="#00000000" android:strokeAlpha="0.8"
+        android:pathData="M22,58 C34,48 74,48 86,58 C74,68 34,68 22,58 Z" />
+    <path android:fillColor="#27DFFF" android:pathData="M54,36 L58,54 L54,72 L50,54 Z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M54,47 A7,7 0 1,1 53.99,47 Z" />
+    <path android:fillColor="#43F58A" android:pathData="M54,51 A3,3 0 1,1 53.99,51 Z" />
+</vector>

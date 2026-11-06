@@ -1,0 +1,94 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>html,body{margin:0;background:#061321}canvas{display:block}</style></head>
+<body><canvas id="c"></canvas>
+<script>
+// Mirrors world/gles NexusRenderer draw order and GL state exactly. Shaders are loaded verbatim
+// from world/gles/src/main/assets/shaders, so a compile error here is a compile error on device.
+async function text(u) { const r = await fetch(u); if (!r.ok) throw new Error(u + ' ' + r.status); return r.text(); }
+window.renderScene = async function (sceneUrl, time, pulse) {
+  const S = await (await fetch(sceneUrl)).json();
+  const c = document.getElementById('c'); c.width = S.width; c.height = S.height;
+  const gl = c.getContext('webgl2', { antialias: true });
+  if (!gl) throw new Error('WebGL2 unavailable');
+  const log = [];
+  async function prog(name, vs, fs) {
+    const mk = (type, src, label) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(label + ': ' + gl.getShaderInfoLog(s)); return s; };
+    const p = gl.createProgram();
+    gl.attachShader(p, mk(gl.VERTEX_SHADER, await text('shaders/' + vs), vs));
+    gl.attachShader(p, mk(gl.FRAGMENT_SHADER, await text('shaders/' + fs), fs));
+    gl.linkProgram(p);
+    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(name + ' link: ' + gl.getProgramInfoLog(p));
+    log.push(name + ' ok'); return p;
+  }
+  const P = {
+    sky: await prog('sky', 'sky.vert', 'sky.frag'), lit: await prog('lit', 'lit.vert', 'lit.frag'),
+    atmo: await prog('atmo', 'atmo.vert', 'atmo.frag'), line: await prog('line', 'line.vert', 'line.frag'),
+    particle: await prog('particle', 'particle.vert', 'particle.frag'), glow: await prog('glow', 'glow.vert', 'glow.frag'),
+  };
+  const U = (p, n) => gl.getUniformLocation(p, n);
+  const ident = new Float32Array([1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1]);
+  function meshVao(m) {
+    const vao = gl.createVertexArray(); gl.bindVertexArray(vao);
+    const vb = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, vb); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(m.v), gl.STATIC_DRAW);
+    const ib = gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint32Array(m.i), gl.STATIC_DRAW);
+    const st = 40; gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 3, gl.FLOAT, false, st, 0);
+    gl.enableVertexAttribArray(1); gl.vertexAttribPointer(1, 3, gl.FLOAT, false, st, 12);
+    gl.enableVertexAttribArray(2); gl.vertexAttribPointer(2, 3, gl.FLOAT, false, st, 24);
+    gl.enableVertexAttribArray(3); gl.vertexAttribPointer(3, 1, gl.FLOAT, false, st, 36);
+    return { vao, count: m.i.length };
+  }
+  function floatVao(arr, layout, stride) {
+    const vao = gl.createVertexArray(); gl.bindVertexArray(vao);
+    const vb = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, vb); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(arr), gl.STATIC_DRAW);
+    layout.forEach(([loc, size, off]) => { gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, size, gl.FLOAT, false, stride * 4, off * 4); });
+    return { vao, count: arr.length / stride };
+  }
+  const planet = meshVao(S.planet), structures = meshVao(S.structures), orbiters = meshVao(S.orbiters), atmo = meshVao(S.atmosphere);
+  const lines = floatVao(S.lines, [[0,3,0],[1,1,3]], 4), orbitLines = floatVao(S.orbitLines, [[0,3,0],[1,1,3]], 4);
+  const parts = floatVao(S.particles, [[0,3,0],[1,3,3]], 6), glows = floatVao(S.glows, [[0,4,0],[1,4,4]], 8);
+  const orbitAngle = time * 0.05; const co = Math.cos(orbitAngle), so = Math.sin(orbitAngle);
+  const orbitModel = new Float32Array([co,0,-so,0, 0,1,0,0, so,0,co,0, 0,0,0,1]);
+  const boost = pulse >= 0 && pulse <= 1 ? (1 - pulse) : 0;
+
+  gl.viewport(0, 0, S.width, S.height);
+  gl.clearColor(0.024, 0.075, 0.13, 1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  // 1. Sky
+  gl.disable(gl.DEPTH_TEST); gl.depthMask(false); gl.disable(gl.BLEND);
+  gl.useProgram(P.sky); gl.uniformMatrix4fv(U(P.sky,'uInvViewProj'), false, S.invViewProj);
+  gl.uniform1f(U(P.sky,'uTime'), time); gl.uniform3fv(U(P.sky,'uSunDir'), S.sunDir); gl.uniform1f(U(P.sky,'uStarDensity'), 1);
+  gl.uniform3fv(U(P.sky,'uNebulaA'), S.nebulaA); gl.uniform3fv(U(P.sky,'uNebulaB'), S.nebulaB);
+  gl.bindVertexArray(null); gl.drawArrays(gl.TRIANGLES, 0, 3);
+  // 2. Opaque lit geometry
+  gl.enable(gl.DEPTH_TEST); gl.depthMask(true); gl.enable(gl.CULL_FACE); gl.cullFace(gl.BACK);
+  gl.useProgram(P.lit);
+  gl.uniformMatrix4fv(U(P.lit,'uViewProj'), false, S.viewProj); gl.uniform3fv(U(P.lit,'uCamPos'), S.camPos);
+  gl.uniform3fv(U(P.lit,'uSunDir'), S.sunDir); gl.uniform1f(U(P.lit,'uTime'), time); gl.uniform1f(U(P.lit,'uDevelopment'), S.development);
+  gl.uniform1f(U(P.lit,'uPulse'), pulse); gl.uniform3fv(U(P.lit,'uAccent'), S.accent); gl.uniform3fv(U(P.lit,'uPulseColor'), S.pulseColor);
+  for (const [m, mat, model] of [[planet,0,ident],[structures,1,ident],[orbiters,1,orbitModel]]) {
+    if (!m.count) continue;
+    gl.uniform1i(U(P.lit,'uMaterial'), mat); gl.uniformMatrix4fv(U(P.lit,'uModel'), false, model);
+    gl.bindVertexArray(m.vao); gl.drawElements(gl.TRIANGLES, m.count, gl.UNSIGNED_INT, 0);
+  }
+  // 3. Additive: energy network, atmosphere, particles, glows
+  gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE); gl.depthMask(false); gl.disable(gl.CULL_FACE);
+  gl.useProgram(P.line); gl.uniformMatrix4fv(U(P.line,'uViewProj'), false, S.viewProj); gl.uniform1f(U(P.line,'uTime'), time);
+  gl.uniform3fv(U(P.line,'uColor'), S.accent);
+  for (const [m, model] of [[lines, ident], [orbitLines, orbitModel]]) { if (!m.count) continue;
+    gl.uniformMatrix4fv(U(P.line,'uModel'), false, model); gl.bindVertexArray(m.vao); gl.drawArrays(gl.LINES, 0, m.count); }
+  gl.enable(gl.CULL_FACE); gl.useProgram(P.atmo); gl.uniformMatrix4fv(U(P.atmo,'uViewProj'), false, S.viewProj);
+  gl.uniform3fv(U(P.atmo,'uCamPos'), S.camPos); gl.uniform3fv(U(P.atmo,'uSunDir'), S.sunDir); gl.uniform3fv(U(P.atmo,'uAccent'), S.accent);
+  gl.uniform1f(U(P.atmo,'uStrength'), S.atmoStrength); gl.bindVertexArray(atmo.vao); gl.drawElements(gl.TRIANGLES, atmo.count, gl.UNSIGNED_INT, 0);
+  gl.disable(gl.CULL_FACE);
+  gl.useProgram(P.particle); gl.uniformMatrix4fv(U(P.particle,'uViewProj'), false, S.viewProj); gl.uniform1f(U(P.particle,'uTime'), time);
+  gl.uniform1f(U(P.particle,'uPointScale'), S.height / 1170 * 2.0); gl.uniform1f(U(P.particle,'uBoost'), boost);
+  gl.uniform3fv(U(P.particle,'uColorA'), S.particleA); gl.uniform3fv(U(P.particle,'uColorB'), S.particleB);
+  gl.bindVertexArray(parts.vao); gl.drawArrays(gl.POINTS, 0, parts.count);
+  gl.useProgram(P.glow); gl.uniformMatrix4fv(U(P.glow,'uViewProj'), false, S.viewProj); gl.uniformMatrix4fv(U(P.glow,'uModel'), false, ident);
+  gl.uniform1f(U(P.glow,'uViewportHeight'), S.height); gl.uniform1f(U(P.glow,'uProjScale'), S.proj[5]);
+  gl.uniform1f(U(P.glow,'uTime'), time); gl.uniform1f(U(P.glow,'uBoost'), boost);
+  gl.bindVertexArray(glows.vao); gl.drawArrays(gl.POINTS, 0, glows.count);
+  const err = gl.getError();
+  return { log, glError: err, renderer: gl.getParameter(gl.RENDERER) };
+};
+</script></body></html>

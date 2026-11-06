@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">NEXUS</string>
+    <string name="tagline">YOUR FOCUS. YOUR UNIVERSE.</string>
+    <string name="channel_session">Focus session</string>
+    <string name="channel_session_desc">Live countdown while a focus session is running</string>
+    <string name="channel_complete">Session results</string>
+    <string name="channel_complete_desc">Tells you when a focus session completes</string>
+</resources>

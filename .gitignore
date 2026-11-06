@@ -1,0 +1,13 @@
+.gradle/
+build/
+/local.properties
+.idea/
+*.iml
+.DS_Store
+.kotlin/
+captures/
+*.keystore
+!debug.keystore
+tools/render-harness/node_modules/
+tools/render-harness/out/
+tools/render-harness/scenes/
