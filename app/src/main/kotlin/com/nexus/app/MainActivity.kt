@@ -28,7 +28,7 @@ import com.nexus.app.ui.theme.NexusColors
 import com.nexus.app.ui.theme.NexusPrefs
 import com.nexus.app.ui.theme.NexusTheme
 
-enum class Route { INTRO, ONBOARDING, CHARACTERS, HOME, FOCUS, RESULT, PROFILE, SETTINGS, MISSIONS, PLANETS, RANKINGS }
+enum class Route { INTRO, ONBOARDING, CHARACTERS, HOME, FOCUS, RESULT, PROFILE, SETTINGS, MISSIONS, PLANETS, RANKINGS, DESIGN_SYSTEM }
 
 class MainActivity : ComponentActivity() {
     private val vm: NexusViewModel by viewModels()
@@ -64,7 +64,7 @@ private fun NexusApp(vm: NexusViewModel) {
     val notifPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
     val go: (Route) -> Unit = { route = it }
     BackHandler(enabled = route !in setOf(Route.HOME, Route.INTRO, Route.ONBOARDING)) {
-        route = when (route) { Route.SETTINGS -> Route.PROFILE; Route.CHARACTERS -> Route.ONBOARDING; else -> Route.HOME }
+        route = when (route) { Route.SETTINGS -> Route.PROFILE; Route.DESIGN_SYSTEM -> Route.SETTINGS; Route.CHARACTERS -> Route.ONBOARDING; else -> Route.HOME }
     }
 
     AnimatedContent(route, transitionSpec = { fadeIn(tween(450)) togetherWith fadeOut(tween(300)) }, label = "route") { r ->
@@ -78,7 +78,8 @@ private fun NexusApp(vm: NexusViewModel) {
             })
             Route.RESULT -> ResultScreen(vm, onContinue = { vm.consumeOutcome(); go(Route.HOME) })
             Route.PROFILE -> ProfileScreen(vm, onBack = { go(Route.HOME) }, onSettings = { go(Route.SETTINGS) })
-            Route.SETTINGS -> SettingsScreen(vm, onBack = { go(Route.PROFILE) }, onReplayIntro = { go(Route.INTRO) })
+            Route.SETTINGS -> SettingsScreen(vm, onBack = { go(Route.PROFILE) }, onReplayIntro = { go(Route.INTRO) }, onDesignSystem = { go(Route.DESIGN_SYSTEM) })
+            Route.DESIGN_SYSTEM -> DesignSystemScreen(onBack = { go(Route.SETTINGS) })
             Route.MISSIONS, Route.PLANETS, Route.RANKINGS -> LockedSectorScreen(r, vm, onBack = { go(Route.HOME) })
         }
     }

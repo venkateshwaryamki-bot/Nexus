@@ -23,7 +23,7 @@ import com.nexus.world.scene.GraphicsQuality
 
 /** Screen 13 — Settings. Everything here is functional; planned items are labelled as such. */
 @Composable
-fun SettingsScreen(vm: NexusViewModel, onBack: () -> Unit, onReplayIntro: () -> Unit) {
+fun SettingsScreen(vm: NexusViewModel, onBack: () -> Unit, onReplayIntro: () -> Unit, onDesignSystem: () -> Unit = {}) {
     val s by vm.settings.collectAsStateWithLifecycle()
     val ctx = LocalContext.current
     var confirmReset by remember { mutableStateOf(false) }
@@ -85,6 +85,8 @@ fun SettingsScreen(vm: NexusViewModel, onBack: () -> Unit, onReplayIntro: () -> 
             }
             Section("Universe") {
                 NexusSecondaryButton("Replay intro", onReplayIntro, Modifier.fillMaxWidth())
+                Spacer(Modifier.height(10.dp))
+                NexusSecondaryButton("Design system", onDesignSystem, Modifier.fillMaxWidth())
                 Spacer(Modifier.height(10.dp))
                 NexusSecondaryButton("Reset all progress", { confirmReset = true }, Modifier.fillMaxWidth(), accent = NexusColors.Danger)
             }

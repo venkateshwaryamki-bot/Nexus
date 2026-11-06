@@ -8,13 +8,15 @@ Defined once in `ui/theme/Theme.kt` (`NexusColors`) and `world/scene/Palette.kt`
 
 | Token | Hex | Use |
 |---|---|---|
-| Deep Space Navy | `#061321` | Primary background, window background |
-| Midnight Blue | `#0B2035` | Secondary background, panels |
-| Electric Cyan | `#27DFFF` | Primary accent: energy, the tower, interactive highlights |
-| Neon Green | `#43F58A` | Energy gained, success, the pulse wave |
+| Background | `#06111E` | Window background |
+| Surface | `#0A1B2B` | Secondary background |
+| Card | `#102638` | Cards, chips, nav bar |
+| Primary (cyan) | `#20D6EA` → Turquoise `#2FE3C8` | Primary accent and primary-button gradient |
+| Success (green) | `#37E6A0` | Energy gained, completed missions |
 | Cosmic Gold | `#F5C85B` | Premium, rules, level-ups, warnings that aren't errors |
 | Purple | `#9275FF` | NEXA, mystery, nebulae, locked sectors |
-| Text | White / `#A9BCCF` / `#6B8399` | Primary / secondary / muted |
+| Danger | `#F06A7A` | Ending a session, destructive actions |
+| Text | `#EAF4FF` / `#92A6B8` / `#5E7488` | Primary / secondary / muted |
 
 Rules:
 - Cyan is the default accent, and green means *you earned something*.
@@ -23,15 +25,17 @@ Rules:
 
 ## Typography
 
-- **Rajdhani** (SemiBold/Bold) for game-oriented headings, labels and HUD text, always uppercase with tracking.
-- **Space Grotesk** for body text, numbers and the timer.
-- Minimum body size is 12.5 sp. Labels are 13 sp with wide tracking, for readability on mid-range 1080p panels.
+- **Space Grotesk** (Regular/Medium/Bold) for titles, headings, buttons, the timer and big numbers.
+- **Inter** (Regular to Bold) for body text, labels and UI, with tabular figures (`tnum`) for timers and stats.
+- The whole system (tokens and components) is visible in the app under Settings → Design system (`DesignSystemScreen.kt`).
+- Minimum body size is 12.5 sp, captions 11 sp. Labels are 12 sp with wide tracking, for readability on mid-range 1080p panels.
 
 ## UI language
 
 - **Glass HUD panels** (`GlassPanel`): translucent gradient, hairline cyan border fading downward, and **corner brackets** as the signature motif.
-- The primary button is an energised cyan→green gradient with a slow moving sheen and press scale.
-- Secondary buttons are outlined and tinted.
+- **Buttons** (`NexusButton`) come in four variants. Primary has a cyan→turquoise fill with a soft glow and is used once per screen. Secondary is a card fill with a cyan outline. Ghost is text only. Danger is a red outline. All have a press scale and haptics, and a touch target of at least 48 dp.
+- **Cards** (`NexusCard`) are solid card surfaces (no stacked translucency), with tones Default, Highlight, Success and Premium.
+- Composite components: `MissionCard`, `QuickActionTile`, `PlanetRow`, `CurrencyChip`, `StatusPill`, `LabeledProgress`, `PlayerTopBar`, `NexusBottomBar` (raised centre Focus button).
 - Icons are **custom line glyphs drawn in code** (`NexusIcon`): a minimal stroke set with no stock icon pack.
 - Motion is slow and purposeful. Reduce motion freezes it.
 

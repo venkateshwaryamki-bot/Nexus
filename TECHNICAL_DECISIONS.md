@@ -93,7 +93,7 @@ Real app blocking on Android needs an AccessibilityService, Device Admin/Owner, 
 
 ## TD-007 — Fonts, audio and art: original or properly licensed
 
-- **Fonts:** Space Grotesk and Rajdhani, both under the SIL OFL 1.1 (`licenses/`). Rajdhani is subset to Latin with fontTools (735 KB → 79 KB).
+- **Fonts:** Space Grotesk and Inter, both under the SIL OFL 1.1 (`licenses/`). Inter is subset to Latin with fontTools (~50 KB per weight). Rajdhani was used in M1 and removed in TD-010.
 - **Audio:** all SFX are synthesised by `tools/audio/generate_sfx.py`, with no third-party samples.
 - **Art:** procedural and vector placeholder art, labelled as such. See `ASSET_PIPELINE.md`.
 
@@ -115,3 +115,16 @@ Real app blocking on Android needs an AccessibilityService, Device Admin/Owner, 
 ## TD-009 — Development-environment notes (not project configuration)
 
 The cloud sandbox used for M1 rate-limits Maven Central. A **machine-local** Gradle init script (`~/.gradle/init.d/`) points to Google's official Maven Central mirror, and the `robolectricRepoUrl` Gradle property points Robolectric's runtime downloads at the same mirror. Neither is committed project configuration, and normal machines need neither.
+
+## TD-010 — UI/UX v2: 2D/2.5D environments over real-time 3D
+
+**Context.** The product owner's v2 blueprint asks for illustrated, game-quality screens, explicitly prefers optimised 2D/2.5D environments, and wants progression shown by asset swapping, scaling and subtle animation rather than procedural 3D.
+
+**Decision.**
+- Home, planet development and tree growth move to **layered 2.5D scenes**: pre-drawn layers (sky, island, buildings, trees, FX) composited in Compose, with parallax and idle animation.
+- The GLES renderer stays in the repo behind `WorldHost` (TD-001) but is no longer the home-screen default once Phase 2 lands. The interface makes this a one-line factory change.
+- Compose composites a handful of bitmaps or vector layers cheaply. Expected cost on mid-range devices is lower than the GL scene (no continuous 30k-triangle frame), which suits 60 FPS with fallback.
+
+**Typography change.** Headings use Space Grotesk and body/labels use Inter, per the blueprint. Rajdhani was removed.
+
+**Palette change.** Tokens moved to the blueprint values (background `#06111E`, surface `#0A1B2B`, card `#102638`, primary `#20D6EA`, success `#37E6A0`, secondary `#9275FF`, muted `#92A6B8`). The hex values were read off the blueprint image, so they are approximate.

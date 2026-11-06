@@ -15,7 +15,9 @@
 | `core:data` `SettlementTest` (Robolectric + real SQLite) | 4 | 10 concurrent reconciles → one ledger row; direct duplicate settle rejected by the DB; **open session survives a new handle (process death)**; daily stats, longest session and streak aggregation |
 | `app` `FirstSessionJourneyTest` (Robolectric + Compose) | 1 (long) | Full first-run journey through the real app: intro → guest registration → AIRA/VYON → home (outpost) → 60-min session → pause/resume (paused time excluded) → completion → **+60 energy / +145 XP, one ledger row** → home shows Small Settlement and the world receives stage 1 plus an energy pulse → profile. Writes 12 screenshots to `app/build/screenshots/`. |
 
-**Latest result (M1): 41/41 passing.**
+| `app` `DesignSystemTest` (Robolectric + Compose) | 1 | Renders every token and component, checks that bottom-nav selection moves on tap, and saves `ds_reference.png`. |
+
+**Latest result (UI v2 Phase 1): 42/42 passing.**
 
 ### Shader and render verification (headless GPU path)
 

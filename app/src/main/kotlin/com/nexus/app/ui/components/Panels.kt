@@ -62,68 +62,17 @@ fun GlassPanel(
 fun SectionLabel(text: String, modifier: Modifier = Modifier, color: Color = NexusColors.ElectricCyan) =
     Text(text.uppercase(), style = NexusType.Label, color = color, modifier = modifier)
 
-/** Primary call to action: energised gradient with a moving sheen and press feedback. */
+/** Back-compat wrappers: all buttons route through [NexusButton]. */
 @Composable
-fun NexusPrimaryButton(
-    text: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    leading: Glyph? = null,
-    colors: List<Color> = listOf(NexusColors.ElectricCyan, Color(0xFF35EBC0), NexusColors.NeonGreen),
-) {
-    val haptic = LocalHapticFeedback.current
-    val prefs = LocalNexusPrefs.current
-    val source = remember { MutableInteractionSource() }
-    val pressed by source.collectIsPressedAsState()
-    val scale by animateFloatAsState(if (pressed) 0.96f else 1f, label = "press")
-    val sheen = if (prefs.reduceMotion) 0.3f else rememberInfiniteTransition(label = "sheen")
-        .animateFloat(-0.3f, 1.3f, infiniteRepeatable(tween(2600, easing = LinearEasing)), label = "sheenX").value
-    val shape = RoundedCornerShape(16.dp)
-    Box(
-        modifier
-            .scale(scale)
-            .heightIn(min = 56.dp)
-            .clip(shape)
-            .background(if (enabled) Brush.horizontalGradient(colors) else Brush.horizontalGradient(listOf(Color(0xFF22384D), Color(0xFF1A2D40))))
-            .drawWithContent {
-                drawContent()
-                if (enabled) {
-                    val x = size.width * sheen
-                    drawRect(Brush.linearGradient(listOf(Color.Transparent, Color.White.copy(alpha = 0.35f), Color.Transparent),
-                        start = Offset(x - 120f, 0f), end = Offset(x + 120f, size.height)))
-                }
-            }
-            .clickable(source, null, enabled = enabled, role = Role.Button) {
-                if (prefs.haptics) haptic.performHapticFeedback(HapticFeedbackType.LongPress); onClick()
-            }
-            .padding(horizontal = 24.dp, vertical = 14.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
-            val fg = if (enabled) NexusColors.DeepSpaceNavy else NexusColors.TextMuted
-            if (leading != null) { NexusIcon(leading, fg, size = 20.dp); Spacer(Modifier.width(10.dp)) }
-            Text(text.uppercase(), style = NexusType.Heading, color = fg, textAlign = TextAlign.Center)
-        }
-    }
-}
+fun NexusPrimaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true,
+                       leading: Glyph? = null, trailing: Glyph? = null) =
+    NexusButton(text, onClick, modifier, ButtonVariant.Primary, enabled = enabled, leading = leading, trailing = trailing)
 
 @Composable
 fun NexusSecondaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true,
-                         accent: Color = NexusColors.ElectricCyan, leading: Glyph? = null) {
-    val shape = RoundedCornerShape(14.dp)
-    val c = if (enabled) accent else NexusColors.TextMuted
-    Row(
-        modifier.heightIn(min = 50.dp).clip(shape).background(accent.copy(alpha = if (enabled) 0.08f else 0.03f))
-            .border(1.dp, c.copy(alpha = 0.55f), shape)
-            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
-            .padding(horizontal = 18.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center,
-    ) {
-        if (leading != null) { NexusIcon(leading, c, size = 18.dp); Spacer(Modifier.width(8.dp)) }
-        Text(text.uppercase(), style = NexusType.Label, color = c)
-    }
-}
+                         accent: Color = NexusColors.ElectricCyan, leading: Glyph? = null) =
+    NexusButton(text, onClick, modifier, if (accent == NexusColors.Danger) ButtonVariant.Danger else ButtonVariant.Secondary,
+        size = ButtonSize.Medium, enabled = enabled, leading = leading)
 
 /** Thin glowing progress bar. */
 @Composable
@@ -137,7 +86,7 @@ fun EnergyBar(progress: Float, modifier: Modifier = Modifier, height: Dp = 6.dp,
 
 @Composable
 fun StatTile(label: String, value: String, modifier: Modifier = Modifier, accent: Color = NexusColors.ElectricCyan, glyph: Glyph? = null) {
-    GlassPanel(modifier, accent = accent, padding = PaddingValues(14.dp), brackets = false) {
+    NexusCard(modifier, padding = PaddingValues(14.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (glyph != null) { NexusIcon(glyph, accent, size = 16.dp); Spacer(Modifier.width(6.dp)) }
             Text(label.uppercase(), style = NexusType.Label, color = NexusColors.TextSecondary)

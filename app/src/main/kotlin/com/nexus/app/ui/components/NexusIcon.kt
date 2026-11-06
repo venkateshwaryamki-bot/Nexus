@@ -16,7 +16,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /** Minimal line icons drawn in code (original, scalable, no icon-font dependency). */
-enum class Glyph { ENERGY, FOCUS, MISSIONS, PLANETS, RANKINGS, PROFILE, SETTINGS, BELL, PLAY, PAUSE, STOP, LOCK, BACK, CHECK, STAR, CLOCK, FLAME }
+enum class Glyph { ENERGY, FOCUS, MISSIONS, PLANETS, RANKINGS, PROFILE, SETTINGS, BELL, PLAY, PAUSE, STOP, LOCK, BACK, CHECK, STAR, CLOCK, FLAME,
+    UNIVERSE, ARENA, BUILD, BOOK, SOUND, AMBIENT, CRYSTAL, CREDIT, CHEVRON_DOWN, ARROW_RIGHT, TREE }
 
 @Composable
 fun NexusIcon(glyph: Glyph, tint: Color, modifier: Modifier = Modifier, size: Dp = 22.dp) {
@@ -60,5 +61,23 @@ fun DrawScope.drawGlyph(glyph: Glyph, tint: Color) {
             cubicTo(18.5f * s, 19.5f * s, 15f * s, 21.5f * s, 12f * s, 21.5f * s); cubicTo(8.5f * s, 21.5f * s, 5f * s, 19f * s, 5f * s, 15f * s)
             cubicTo(5f * s, 12f * s, 7f * s, 10.5f * s, 8.5f * s, 8.5f * s); cubicTo(9f * s, 11f * s, 10f * s, 12f * s, 11f * s, 12.5f * s)
             cubicTo(11f * s, 9f * s, 11f * s, 5.5f * s, 12f * s, 2.5f * s); close() }, tint)
+        Glyph.UNIVERSE -> { drawPath(p(3f, 11f, 12f, 3.5f, 21f, 11f), tint, style = stroke); drawPath(p(5.5f, 9.5f, 5.5f, 20.5f, 18.5f, 20.5f, 18.5f, 9.5f), tint, style = stroke)
+            drawPath(p(10f, 20.5f, 10f, 14.5f, 14f, 14.5f, 14f, 20.5f), tint, style = stroke) }
+        Glyph.ARENA -> { drawPath(p(7f, 4f, 17f, 4f, 17f, 9f, 15.5f, 12.5f, 12f, 14f, 8.5f, 12.5f, 7f, 9f, close = true), tint, style = stroke)
+            drawPath(p(7f, 6f, 3.5f, 6f, 3.5f, 8f, 7.2f, 10.5f), tint, style = stroke); drawPath(p(17f, 6f, 20.5f, 6f, 20.5f, 8f, 16.8f, 10.5f), tint, style = stroke)
+            drawLine(tint, c(12f, 14f), c(12f, 18f), 1.8f * s, StrokeCap.Round); drawLine(tint, c(8f, 20f), c(16f, 20f), 1.8f * s, StrokeCap.Round) }
+        Glyph.BUILD -> { drawPath(p(12f, 3f, 20f, 7.5f, 20f, 16.5f, 12f, 21f, 4f, 16.5f, 4f, 7.5f, close = true), tint, style = stroke)
+            drawPath(p(4f, 7.5f, 12f, 12f, 20f, 7.5f), tint, style = stroke); drawLine(tint, c(12f, 12f), c(12f, 21f), 1.8f * s, StrokeCap.Round) }
+        Glyph.BOOK -> { drawPath(p(12f, 6f, 8f, 4.5f, 3f, 4.5f, 3f, 18.5f, 8f, 18.5f, 12f, 20f, 16f, 18.5f, 21f, 18.5f, 21f, 4.5f, 16f, 4.5f, 12f, 6f, 12f, 20f), tint, style = stroke) }
+        Glyph.SOUND -> { drawPath(p(4f, 9.5f, 8f, 9.5f, 13f, 5f, 13f, 19f, 8f, 14.5f, 4f, 14.5f, close = true), tint, style = stroke)
+            drawArc(tint, -45f, 90f, false, c(11f, 8f), androidx.compose.ui.geometry.Size(8f * s, 8f * s), style = stroke)
+            drawArc(tint, -45f, 90f, false, c(9f, 5f), androidx.compose.ui.geometry.Size(14f * s, 14f * s), style = stroke) }
+        Glyph.AMBIENT -> { drawPath(p(2.5f, 19f, 9f, 8f, 13f, 14f, 15.5f, 11f, 21.5f, 19f, close = true), tint, style = stroke); drawCircle(tint, 1.8f * s, c(17f, 6f)) }
+        Glyph.CRYSTAL -> { drawPath(p(12f, 2.5f, 19f, 9f, 12f, 21.5f, 5f, 9f, close = true), tint); drawPath(p(5f, 9f, 19f, 9f), tint.copy(alpha = 0.4f), style = stroke) }
+        Glyph.CREDIT -> { drawCircle(tint, 8.5f * s, c(12f, 12f), style = stroke); drawPath(p(12f, 7f, 16f, 12f, 12f, 17f, 8f, 12f, close = true), tint) }
+        Glyph.CHEVRON_DOWN -> drawPath(p(6f, 9.5f, 12f, 15.5f, 18f, 9.5f), tint, style = stroke)
+        Glyph.ARROW_RIGHT -> { drawLine(tint, c(4.5f, 12f), c(19f, 12f), 1.8f * s, StrokeCap.Round); drawPath(p(13.5f, 6.5f, 19f, 12f, 13.5f, 17.5f), tint, style = stroke) }
+        Glyph.TREE -> { drawCircle(tint, 6.5f * s, c(12f, 9f), style = stroke); drawLine(tint, c(12f, 15.5f), c(12f, 21f), 1.8f * s, StrokeCap.Round)
+            drawLine(tint, c(8f, 21f), c(16f, 21f), 1.8f * s, StrokeCap.Round) }
     }
 }

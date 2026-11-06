@@ -12,7 +12,7 @@
 | Focus environments (4) | 2D Canvas scenes | **Placeholder** | Illustrated or 3D-rendered loops (static rendering budget) |
 | UI glyphs | Vector, drawn in code | Final-candidate | |
 | Launcher icon | Vector drawable (adaptive + monochrome) | Final-candidate | Designer pass |
-| Fonts | Space Grotesk, Rajdhani (OFL 1.1, Rajdhani subset to Latin) | Final | |
+| Fonts | Space Grotesk, Inter (OFL 1.1, Inter subset to Latin) | Final | |
 | SFX (intro, completion, energy) | Synthesised (`tools/audio/generate_sfx.py`) | **Placeholder** | Composed sound design. Intro ≤ 7 s, mono 44.1 kHz OGG, −14 LUFS |
 
 Placeholder geometry isn't final production art. This table is the authoritative list.

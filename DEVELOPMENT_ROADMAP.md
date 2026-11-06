@@ -13,6 +13,27 @@
 
 ---
 
+## UI/UX v2 track (blueprint-driven transformation)
+
+Source: the NEXUS "UI/UX Design Blueprint (Implementable)" image supplied by the product owner.
+Direction: **optimised 2D/2.5D environments** with lightweight animation and asset swapping (TD-010),
+keeping the existing timer, rewards, persistence and the WorldHost boundary intact.
+
+| Phase | Scope | Status |
+|---|---|---|
+| 1 | Design system & reusable components: blueprint tokens, Inter + Space Grotesk, button/icon-button/card/chip/pill/progress/mission/quick-action/planet-row/top-bar/bottom-nav, in-app reference screen | ✅ Done |
+| 2 | Home dashboard: 2.5D Nexus Prime floating island, currency chips, planet card, quick actions, new bottom nav (Universe · Missions · Focus · Arena · Profile) | ⏳ Next |
+| 3 | Focus Chamber: animated ring countdown, glowing energy core, ambient/sound controls, task picker, energy charging | Planned |
+| 4 | Session completion & reward animations (crystal burst, counters, progress 35%→40%), credits currency | Planned |
+| 5 | Planet development visuals: Outpost → Research Lab → Tech Hub (layered 2.5D asset sets) | Planned |
+| 6 | Tree growth: Seed → Sprout → Young → Mature → Ancient (5 separate assets, scale + sway animation) | Planned |
+| 7 | Missions & achievements (functional, data-driven) | Planned |
+| 8 | Galaxy & unlockable planets (Orion Lv 5, Aether Lv 10, Titan Lv 15, Eclipse Lv 20) | Planned |
+| 9 | Character illustrations & interactions | Planned |
+| 10 | Profile, statistics, final polish, device performance pass | Planned |
+
+Each phase ships complete (code + tests + screenshots) before the next begins.
+
 ## M0 — Research & technical decision ✅
 
 - [x] Inspect the environment. Findings: JDK 21, Gradle 8.14, no Android SDK (installed after allowing `dl.google.com`), no KVM, Maven Central rate-limited (mirror), GitHub release downloads blocked.

@@ -64,13 +64,13 @@ class FirstSessionJourneyTest {
         shot("01_intro")
         rule.onNodeWithText("SKIP").performClick(); advanceUi(800)
 
-        rule.onNodeWithText("CONTINUE AS GUEST").assertIsDisplayed()
+        rule.onNodeWithText("Continue as guest").assertIsDisplayed()
         shot("02_registration")
-        rule.onNodeWithText("CONTINUE AS GUEST").performClick(); advanceUi(800)
+        rule.onNodeWithText("Continue as guest").performClick(); advanceUi(800)
         rule.onNode(hasSetTextAction()).performTextInput("Nova")
         rule.onNodeWithText("SENTINEL").performClick(); advanceUi(300)
         shot("03_callsign")
-        rule.onNodeWithText("CONFIRM EXPLORER").performClick(); advanceUi(1500)
+        rule.onNodeWithText("Confirm explorer").performClick(); advanceUi(1500)
 
         advanceUi(3000)
         rule.onNodeWithText("Welcome, Explorer. Your universe is waiting to be rebuilt.").assertExists()
@@ -85,22 +85,22 @@ class FirstSessionJourneyTest {
         assertEquals(0, FakeWorldView.states.last().stage)
         shot("06_home_outpost")
 
-        rule.onNodeWithText("ENTER FOCUS CHAMBER").performClick(); advanceUi(800)
+        rule.onNodeWithText("Enter Focus Chamber").performClick(); advanceUi(800)
         rule.onNode(hasSetTextAction()).performTextInput("Read chapter 4")
         rule.onNodeWithText("60 MIN").performClick(); advanceUi(300)
         shot("07_focus_setup")
-        rule.onNodeWithText("BEGIN FOCUS · 60 MIN").performScrollTo().performClick()
+        rule.onNodeWithText("Begin focus · 60 min").performScrollTo().performClick()
         waitUntilText("REMAINING")
         clock.advance(17 * MINUTE + 25_000); advanceUi(600)
         rule.onNodeWithText("42:35").assertExists()
         shot("08_chamber_running")
 
-        rule.onNodeWithText("PAUSE (3 LEFT)").performClick()
+        rule.onNodeWithText("Pause (3 left)").performClick()
         waitUntilText("PAUSED")
         clock.advance(2 * MINUTE); advanceUi(600)
         rule.onNodeWithText("42:35").assertExists() // paused time does not count
         shot("09_chamber_paused")
-        rule.onNodeWithText("RESUME").performClick()
+        rule.onNodeWithText("Resume").performClick()
         waitUntilText("REMAINING")
 
         // The phone sits on the desk for the rest of the hour.
@@ -116,7 +116,7 @@ class FirstSessionJourneyTest {
         assertEquals(60, player.energyBalance); assertEquals(145, player.totalXp)
         assertEquals("exactly one reward row", 1, runBlocking { c.db.ledger().count() })
 
-        rule.onNodeWithText("RETURN TO NEXUS PRIME").performScrollTo().performClick(); advanceUi(2000)
+        rule.onNodeWithText("Return to Nexus Prime").performScrollTo().performClick(); advanceUi(2000)
         rule.onNodeWithText("SMALL SETTLEMENT").assertExists()
         assertEquals(1, FakeWorldView.states.last().stage)
         assertTrue(FakeWorldView.states.last().development > 0f)
