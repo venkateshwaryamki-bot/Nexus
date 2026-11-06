@@ -11,3 +11,4 @@ captures/
 tools/render-harness/node_modules/
 tools/render-harness/out/
 tools/render-harness/scenes/
+demo/
