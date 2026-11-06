@@ -4,7 +4,7 @@
 
 | Asset | Source | Status | Replacement requirement |
 |---|---|---|---|
-| Nexus Prime floating island, 5 stages (home) | Scripted Blender scene, Cycles pre-render (`tools/art/nexus_island.py`) → `res/drawable-nodpi/island_stage0-4.webp` (829×954, 312 KB total) | Production-candidate (original, stylised low-poly) | An artist pass can replace the WebPs 1:1 (same size and framing) |
+| Nexus Prime island, layered (home, Build, debrief) | Scripted Blender scene (`tools/art/island_layers.py`): `base_s0-4` terrain, `tower_s0-4`, `b_<type>_<1-3>` buildings; each layer cropped, with its frame position and camera depth generated into `ui/art/IslandLayout.kt` (`export_layers.py`) | Production-candidate | Replace any layer 1:1 (same camera: ortho 9.4, from (0,-14,5.2) aimed at (0,0,-0.35)) |
 | Nexus Prime live 3D (optional setting) | Procedural (`world/scene/PlanetScene.kt`) | Placeholder | Kept as an option per TD-010 |
 | Shaders | `world/gles/src/main/assets/shaders/*.vert|frag` | Production-candidate | Extend for normal maps and texture atlases once authored assets arrive |
 | Character portraits (AIRA, VYON, ORION, KAEL, NEXA) | Vector, drawn in code | **Placeholder** | Rigged 3D models + 2D key art matching the identity rules |
@@ -85,5 +85,5 @@ BPY_PYTHON=/path/to/venv/bin/python tools/art/build_assets.sh
 
 - Each stage renders at 1080² with Cycles (64 samples + OpenImageDenoise), using a transparent film and the AgX view transform.
 - Bloom comes from a second, emission-only render (all non-emissive surfaces turned matte black), blurred at two radii and added back. Only real light sources glow.
-- All stages share one crop box, so the island never shifts when the stage changes.
+- **Layered island.** Every layer renders with the same orthographic camera. Building and tower layers use the terrain as a Cycles *shadow catcher*, so they carry their own contact shadows and are hidden where terrain is in front of them. The app stacks the layers far to near using the generated depth values. `tools/art/compose_preview.py` does the same in Python for quick checks.
 - Placement is deterministic and fixed across stages: the city grows rather than reshuffles.

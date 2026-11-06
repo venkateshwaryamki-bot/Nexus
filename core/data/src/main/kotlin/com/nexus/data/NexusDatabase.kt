@@ -9,11 +9,14 @@ import androidx.room.RoomDatabase
 @Database(
     entities = [
         PlayerEntity::class, SessionEntity::class, RewardLedgerEntity::class,
-        DailyStatEntity::class, PlanetProgressEntity::class, SettingEntity::class,
+        DailyStatEntity::class, PlanetProgressEntity::class, SettingEntity::class, BuildingEntity::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = true,
-    autoMigrations = [AutoMigration(from = 1, to = 2)], // v2: credits on player + ledger
+    autoMigrations = [
+        AutoMigration(from = 1, to = 2), // v2: credits on player + ledger
+        AutoMigration(from = 2, to = 3), // v3: building table
+    ],
 )
 abstract class NexusDatabase : RoomDatabase() {
     abstract fun player(): PlayerDao
@@ -22,6 +25,7 @@ abstract class NexusDatabase : RoomDatabase() {
     abstract fun daily(): DailyStatDao
     abstract fun planets(): PlanetDao
     abstract fun settings(): SettingDao
+    abstract fun buildings(): BuildingDao
 
     companion object {
         const val NAME = "nexus.db"

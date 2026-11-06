@@ -1,0 +1,442 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 3,
+    "identityHash": "53f29efa0fc3397746678e3dc84350f4",
+    "entities": [
+      {
+        "tableName": "player",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `username` TEXT NOT NULL, `avatarId` INTEGER NOT NULL, `createdAtWall` INTEGER NOT NULL, `energyBalance` INTEGER NOT NULL, `lifetimeEnergy` INTEGER NOT NULL, `totalXp` INTEGER NOT NULL, `credits` INTEGER NOT NULL DEFAULT 0, `onboardingComplete` INTEGER NOT NULL, `accountType` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "username",
+            "columnName": "username",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "avatarId",
+            "columnName": "avatarId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAtWall",
+            "columnName": "createdAtWall",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "energyBalance",
+            "columnName": "energyBalance",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lifetimeEnergy",
+            "columnName": "lifetimeEnergy",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalXp",
+            "columnName": "totalXp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "credits",
+            "columnName": "credits",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "onboardingComplete",
+            "columnName": "onboardingComplete",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "accountType",
+            "columnName": "accountType",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "focus_session",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `task` TEXT NOT NULL, `plannedMs` INTEGER NOT NULL, `environmentId` TEXT NOT NULL, `createdWall` INTEGER NOT NULL, `state` TEXT NOT NULL, `bankedFocusMs` INTEGER NOT NULL, `segmentStartWall` INTEGER, `segmentStartElapsed` INTEGER, `segmentBootId` TEXT, `pauseCount` INTEGER NOT NULL, `pausedAtWall` INTEGER, `pausedAtElapsed` INTEGER, `pausedBootId` TEXT, `totalPausedMs` INTEGER NOT NULL, `interruptions` INTEGER NOT NULL, `endedWall` INTEGER, `endReason` TEXT, `recoveredAcrossReboot` INTEGER NOT NULL, `clockAnomaly` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "task",
+            "columnName": "task",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "plannedMs",
+            "columnName": "plannedMs",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "environmentId",
+            "columnName": "environmentId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdWall",
+            "columnName": "createdWall",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "state",
+            "columnName": "state",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bankedFocusMs",
+            "columnName": "bankedFocusMs",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "segmentStartWall",
+            "columnName": "segmentStartWall",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "segmentStartElapsed",
+            "columnName": "segmentStartElapsed",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "segmentBootId",
+            "columnName": "segmentBootId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "pauseCount",
+            "columnName": "pauseCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pausedAtWall",
+            "columnName": "pausedAtWall",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "pausedAtElapsed",
+            "columnName": "pausedAtElapsed",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "pausedBootId",
+            "columnName": "pausedBootId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "totalPausedMs",
+            "columnName": "totalPausedMs",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "interruptions",
+            "columnName": "interruptions",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endedWall",
+            "columnName": "endedWall",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "endReason",
+            "columnName": "endReason",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "recoveredAcrossReboot",
+            "columnName": "recoveredAcrossReboot",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clockAnomaly",
+            "columnName": "clockAnomaly",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_focus_session_state",
+            "unique": false,
+            "columnNames": [
+              "state"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_focus_session_state` ON `${TABLE_NAME}` (`state`)"
+          },
+          {
+            "name": "index_focus_session_endedWall",
+            "unique": false,
+            "columnNames": [
+              "endedWall"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_focus_session_endedWall` ON `${TABLE_NAME}` (`endedWall`)"
+          }
+        ]
+      },
+      {
+        "tableName": "reward_ledger",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sessionId` TEXT NOT NULL, `energy` INTEGER NOT NULL, `xp` INTEGER NOT NULL, `kind` TEXT NOT NULL, `restLimited` INTEGER NOT NULL, `focusMinutes` INTEGER NOT NULL, `dayKey` TEXT NOT NULL, `grantedAtWall` INTEGER NOT NULL, `credits` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`sessionId`))",
+        "fields": [
+          {
+            "fieldPath": "sessionId",
+            "columnName": "sessionId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "energy",
+            "columnName": "energy",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "xp",
+            "columnName": "xp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "kind",
+            "columnName": "kind",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "restLimited",
+            "columnName": "restLimited",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "focusMinutes",
+            "columnName": "focusMinutes",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dayKey",
+            "columnName": "dayKey",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "grantedAtWall",
+            "columnName": "grantedAtWall",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "credits",
+            "columnName": "credits",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "sessionId"
+          ]
+        }
+      },
+      {
+        "tableName": "daily_stat",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`dayKey` TEXT NOT NULL, `focusMs` INTEGER NOT NULL, `completedSessions` INTEGER NOT NULL, `endedEarlySessions` INTEGER NOT NULL, `energyEarned` INTEGER NOT NULL, `xpEarned` INTEGER NOT NULL, `rewardedMinutes` INTEGER NOT NULL, PRIMARY KEY(`dayKey`))",
+        "fields": [
+          {
+            "fieldPath": "dayKey",
+            "columnName": "dayKey",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "focusMs",
+            "columnName": "focusMs",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "completedSessions",
+            "columnName": "completedSessions",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endedEarlySessions",
+            "columnName": "endedEarlySessions",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "energyEarned",
+            "columnName": "energyEarned",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "xpEarned",
+            "columnName": "xpEarned",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rewardedMinutes",
+            "columnName": "rewardedMinutes",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "dayKey"
+          ]
+        }
+      },
+      {
+        "tableName": "planet_progress",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`planetId` TEXT NOT NULL, `unlocked` INTEGER NOT NULL, `developmentEnergy` INTEGER NOT NULL, PRIMARY KEY(`planetId`))",
+        "fields": [
+          {
+            "fieldPath": "planetId",
+            "columnName": "planetId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "unlocked",
+            "columnName": "unlocked",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "developmentEnergy",
+            "columnName": "developmentEnergy",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "planetId"
+          ]
+        }
+      },
+      {
+        "tableName": "setting",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`key` TEXT NOT NULL, `value` TEXT NOT NULL, PRIMARY KEY(`key`))",
+        "fields": [
+          {
+            "fieldPath": "key",
+            "columnName": "key",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "value",
+            "columnName": "value",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "key"
+          ]
+        }
+      },
+      {
+        "tableName": "building",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`planetId` TEXT NOT NULL, `type` TEXT NOT NULL, `level` INTEGER NOT NULL, `updatedAtWall` INTEGER NOT NULL, PRIMARY KEY(`planetId`, `type`))",
+        "fields": [
+          {
+            "fieldPath": "planetId",
+            "columnName": "planetId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "level",
+            "columnName": "level",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAtWall",
+            "columnName": "updatedAtWall",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "planetId",
+            "type"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '53f29efa0fc3397746678e3dc84350f4')"
+    ]
+  }
+}

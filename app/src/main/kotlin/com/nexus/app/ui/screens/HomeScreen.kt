@@ -38,6 +38,7 @@ fun HomeScreen(vm: NexusViewModel, go: (Route) -> Unit) {
     val settings by vm.settings.collectAsStateWithLifecycle()
     val stats by vm.stats.collectAsStateWithLifecycle()
     val open by vm.openSession.collectAsStateWithLifecycle()
+    val levels by vm.buildingLevels.collectAsStateWithLifecycle()
     val p = player ?: return
     val civ = p.civilization
     var pulseKey by remember { mutableIntStateOf(0) }
@@ -70,7 +71,7 @@ fun HomeScreen(vm: NexusViewModel, go: (Route) -> Unit) {
             // Hero: the headquarters (illustrated by default; the live 3D world is an option in Settings).
             Box(Modifier.weight(1f).fillMaxWidth().clickable(remember { MutableInteractionSource() }, null) { go(Route.PLANETS) }, contentAlignment = Alignment.Center) {
                 if (settings.liveWorld) LiveWorld(civ.overallDevelopment, civ.stage.ordinal, settings, pulseKey)
-                else NexusIsland(civ.stage.ordinal, civ.progressToNext, civ.stage.title, Modifier.fillMaxSize().padding(horizontal = Space.xs), pulseKey)
+                else NexusIsland(civ.stage.ordinal, levels, civ.stage.title, Modifier.fillMaxSize().padding(horizontal = Space.xs), pulseKey)
                 androidx.compose.animation.AnimatedVisibility(gain != null, Modifier.align(Alignment.BottomCenter).padding(bottom = Space.xs),
                     enter = fadeIn() + slideInVertically { it / 2 }, exit = fadeOut()) {
                     Row(verticalAlignment = Alignment.CenterVertically) {

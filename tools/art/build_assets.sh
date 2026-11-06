@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Renders all NEXUS 2.5D art and converts it to WebP app resources.
+# Renders all NEXUS 2.5D art and converts it to app resources.
 # Usage: BPY_PYTHON=/path/to/python-with-bpy tools/art/build_assets.sh [--skip-render]
 set -euo pipefail
 cd "$(dirname "$0")/../.."
@@ -7,32 +7,15 @@ PY="${BPY_PYTHON:-python3}"
 OUT=build/art; RES=app/src/main/res/drawable-nodpi
 mkdir -p "$OUT" "$RES"
 if [[ "${1:-}" != "--skip-render" ]]; then
-  for st in 0 1 2 3 4; do
-    "$PY" tools/art/nexus_island.py --stage "$st" --out "$OUT/island_stage$st.png" --res 1080 --samples 64 > /dev/null 2>&1
-  done
-fi
-# One shared crop for all stages (union of visible pixels + margin), so swapping stages never shifts the island.
-python3 - "$OUT" "$RES" <<'PY'
-import sys
-from PIL import Image
-out, res = sys.argv[1], sys.argv[2]
-ims = [Image.open(f"{out}/island_stage{s}.png").convert("RGBA") for s in range(5)]
-boxes = [im.getchannel("A").point(lambda a: 255 if a > 10 else 0).getbbox() for im in ims]
-l = min(b[0] for b in boxes); t = min(b[1] for b in boxes); r = max(b[2] for b in boxes); b = max(b[3] for b in boxes)
-m = 16; box = (max(0, l - m), max(0, t - m), min(ims[0].width, r + m), min(ims[0].height, b + m))
-for s, im in enumerate(ims):
-    c = im.crop(box); c.save(f"{res}/island_stage{s}.webp", "WEBP", quality=86, method=6)
-    print(f"island_stage{s}.webp {c.size[0]}x{c.size[1]}")
-PY
-du -ch "$RES"/island_stage*.webp | tail -1
-
-# Focus Chamber environments (portrait backdrops, opaque) and the energy core sprite.
-if [[ "${1:-}" != "--skip-render" ]]; then
+  # Layered Nexus Prime island: terrain + tower per stage, every building at every level.
+  "$PY" tools/art/island_layers.py --out "$OUT/layers" --res 1080 --samples 48 > /dev/null 2>&1
+  # Focus Chamber environments and the energy core.
   for env in command_centre observatory aether_forest titan_station; do
     "$PY" tools/art/focus_chamber.py --env "$env" --out "$OUT/chamber_$env.png" --res 1080 --samples 64 > /dev/null 2>&1
   done
   "$PY" tools/art/focus_chamber.py --core --out "$OUT/energy_core.png" --res 512 --samples 64 > /dev/null 2>&1
 fi
+python3 tools/art/export_layers.py "$OUT/layers"
 python3 - "$OUT" "$RES" <<'PY'
 import sys
 from PIL import Image
@@ -40,8 +23,7 @@ out, res = sys.argv[1], sys.argv[2]
 for env in ["command_centre", "observatory", "aether_forest", "titan_station"]:
     im = Image.open(f"{out}/chamber_{env}.png").convert("RGB")
     im.save(f"{res}/chamber_{env}.webp", "WEBP", quality=82, method=6)
-    # Small thumbnail for the environment picker (avoids decoding 4 full backdrops).
     im.resize((im.width // 4, im.height // 4), Image.LANCZOS).save(f"{res}/chamber_thumb_{env}.webp", "WEBP", quality=80, method=6)
 Image.open(f"{out}/energy_core.png").save(f"{res}/energy_core.webp", "WEBP", quality=88, method=6)
 PY
-du -ch "$RES"/chamber_*.webp "$RES"/energy_core.webp | tail -1
+du -ch "$RES"/*.webp | tail -1

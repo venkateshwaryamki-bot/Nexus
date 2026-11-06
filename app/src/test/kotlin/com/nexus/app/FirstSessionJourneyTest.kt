@@ -135,9 +135,27 @@ class FirstSessionJourneyTest {
         rule.onNodeWithContentDescription("12 credits").assertExists()
         shot("11_home_settlement")
 
+        // Phase 5: spend the energy on the first structure.
+        rule.onNodeWithText("Build").performClick(); advanceUi(1200)
+        rule.onNodeWithContentDescription("60 energy available").assertExists()
+        shot("11b_build_before")
+        rule.onAllNodesWithText("Build").filterToOne(hasClickAction() and hasAnyAncestor(hasText("Energy Reactor"))).performClick()
+        waitUntil { rule.onAllNodesWithContentDescription("30 energy available").fetchSemanticsNodes().isNotEmpty() }
+        waitUntil { rule.onAllNodesWithContentDescription("Level 1 of 3").fetchSemanticsNodes().isNotEmpty() }
+        rule.onNodeWithContentDescription("Nexus Prime, Small Settlement, 1 structures").assertExists()
+        advanceUi(800)
+        shot("11c_build_after")
+        assertEquals(165, runBlocking { c.db.player().get()!!.totalXp }) // 145 + 20 for the reactor
+        rule.activity.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }; advanceUi(1200)
+
         rule.onNode(hasText("Profile") and SemanticsMatcher.expectValue(androidx.compose.ui.semantics.SemanticsProperties.Role, androidx.compose.ui.semantics.Role.Tab))
             .performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick); advanceUi(1200)
         shot("12_profile")
+    }
+
+    private fun waitUntil(cond: () -> Boolean) {
+        repeat(40) { if (cond()) return; Thread.sleep(50); advanceUi(250) }
+        fail("Timed out waiting for condition")
     }
 
     private fun waitUntilText(text: String) {

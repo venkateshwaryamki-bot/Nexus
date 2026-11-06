@@ -104,3 +104,7 @@ data class PlanetProgressEntity(
 
 @Entity(tableName = "setting")
 data class SettingEntity(@PrimaryKey val key: String, val value: String)
+
+/** Player-built structure levels per planet (schema v3). */
+@Entity(tableName = "building", primaryKeys = ["planetId", "type"])
+data class BuildingEntity(val planetId: String, val type: String, val level: Int, val updatedAtWall: Long)

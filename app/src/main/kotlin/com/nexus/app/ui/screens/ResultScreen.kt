@@ -123,7 +123,8 @@ fun ResultScreen(vm: NexusViewModel, onContinue: () -> Unit) {
                         contentDescription = if (evolved) "Nexus Prime evolved from ${civBefore.stage.title} to ${civAfter.stage.title}"
                             else "Nexus Prime progress ${(civBefore.progressToNext * 100).toInt()} to ${(civAfter.progressToNext * 100).toInt()} percent" }) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Image(painterResource(IslandStageArt[civAfter.stage.ordinal]), null, Modifier.size(64.dp))
+                            val levels by vm.buildingLevels.collectAsStateWithLifecycle()
+                            NexusIsland(civAfter.stage.ordinal, levels, civAfter.stage.title, Modifier.size(64.dp), animate = false)
                             Spacer(Modifier.width(Space.sm))
                             Column(Modifier.weight(1f)) {
                                 Text("NEXUS PRIME", style = NexusType.Heading, color = NexusColors.TextPrimary)

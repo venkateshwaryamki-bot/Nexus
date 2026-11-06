@@ -149,3 +149,29 @@ class SettingsRepository(private val db: NexusDatabase) {
     /** Wipes all progress and returns to a fresh guest profile. */
     suspend fun resetProgress() = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { db.clearAllTables() }
 }
+
+class RoomBuildingRepository(private val db: NexusDatabase, private val now: () -> Long = System::currentTimeMillis) :
+    com.nexus.domain.repository.BuildingRepository {
+    private val planet = Planets.NEXUS_PRIME
+
+    override fun observeLevels() = db.buildings().observe(planet).map { rows ->
+        rows.mapNotNull { r -> runCatching { com.nexus.domain.civilization.BuildingType.valueOf(r.type) }.getOrNull()?.let { it to r.level } }.toMap()
+    }
+
+    override suspend fun build(type: com.nexus.domain.civilization.BuildingType, expectedLevel: Int): com.nexus.domain.repository.BuildResult =
+        db.withTransaction {
+            val current = db.buildings().level(planet, type.name) ?: 0
+            if (current != expectedLevel) return@withTransaction com.nexus.domain.repository.BuildResult.Stale
+            val player = db.player().get() ?: return@withTransaction com.nexus.domain.repository.BuildResult.Stale
+            val stage = Civilization.statusFor((db.planets().get(planet)?.developmentEnergy ?: 0L).toInt()).stage.ordinal
+            when (val c = com.nexus.domain.civilization.Construction.check(type, current, stage, player.energyBalance, player.credits)) {
+                is com.nexus.domain.civilization.BuildCheck.Ok -> {
+                    val xp = com.nexus.domain.civilization.Construction.xpFor(c.toLevel)
+                    if (db.player().spend(c.cost.energy, c.cost.credits, xp) != 1) return@withTransaction com.nexus.domain.repository.BuildResult.Stale
+                    db.buildings().upsert(BuildingEntity(planet, type.name, c.toLevel, now()))
+                    com.nexus.domain.repository.BuildResult.Built(type, c.toLevel, xp)
+                }
+                else -> com.nexus.domain.repository.BuildResult.Rejected(c)
+            }
+        }
+}

@@ -120,21 +120,21 @@ The chamber uses lightweight 2D ambient scenes, not the GL world, to keep 90-min
 
 ## Planned systems (M2–M4)
 
-### Civilization buildings (M2)
+### Civilization buildings (UI v2 Phase 5, implemented)
 
-Buildings are bought with the energy **balance**. Lifetime energy keeps driving the baseline stage.
+Buildings are bought with the energy **balance** and **credits**. Lifetime energy (planet development, which drives the stage and the Nexus Tower) is never reduced by building. Each level is a separate pre-rendered model on its own island slot, so every upgrade visibly changes the island.
 
-| Building | Base cost | Max level | Unlock |
-|---|---|---|---|
-| Energy Reactor | 40 | 5 | Start |
-| Residential Colony | 60 | 5 | Small Settlement |
-| Research Laboratory | 120 | 5 | Small Settlement |
-| Communication Centre | 180 | 4 | Research Colony |
-| Spaceport | 300 | 4 | Research Colony |
-| Defense Tower | 250 | 4 | Metropolis |
-| Nexus Tower | 500 | 5 | Upgrades the HQ itself |
+| Building | Unlocks at | Lv 1 | Lv 2 | Lv 3 | Level names |
+|---|---|---|---|---|---|
+| Energy Reactor | Abandoned Outpost | 30 E | 80 E + 5 C | 180 E + 15 C | Core → Cooled Core → Fusion Dome |
+| Residential Colony | Small Settlement | 50 E | 120 E + 8 C | 250 E + 20 C | Habitat → Twin Habitats → Colony Quarter |
+| Research Laboratory | Small Settlement | 60 E | 150 E + 10 C | 300 E + 25 C | Outpost Lab → Research Lab → Tech Hub |
+| Communication Centre | Research Colony | 90 E + 5 C | 200 E + 15 C | 400 E + 30 C | Relay Mast → Dish Array → Signal Spire |
+| Spaceport | Research Colony | 120 E + 10 C | 260 E + 20 C | 500 E + 40 C | Landing Pad → Control Tower → Starship Dock |
+| Defense Tower | Futuristic Metropolis | 150 E + 10 C | 320 E + 25 C | 600 E + 45 C | Sentry → Pylon Grid → Shield Dome |
+| Nexus Tower | — | grows with the civilization stage | | | |
 
-Cost per level = base × 1.6^(level−1). Each level must change the 3D model.
+Each construction level gives 20 × level XP. Purchases are one database transaction: the level must still match what the UI showed (a double tap builds once), funds are checked with a guarded UPDATE, and the level rises by one.
 
 ### Missions (M2)
 

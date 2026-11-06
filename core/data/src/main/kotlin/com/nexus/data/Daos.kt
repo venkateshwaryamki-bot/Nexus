@@ -16,6 +16,9 @@ interface PlayerDao {
     suspend fun completeOnboarding(name: String, avatar: Int)
     @Query("UPDATE player SET energyBalance = energyBalance + :energy, lifetimeEnergy = lifetimeEnergy + :energy, totalXp = totalXp + :xp, credits = credits + :credits WHERE id = 1")
     suspend fun grant(energy: Int, xp: Int, credits: Int): Int
+    /** Spends from the balance only (lifetime energy = planet development is untouched). Guarded: never goes negative. */
+    @Query("UPDATE player SET energyBalance = energyBalance - :energy, credits = credits - :credits, totalXp = totalXp + :xp WHERE id = 1 AND energyBalance >= :energy AND credits >= :credits")
+    suspend fun spend(energy: Int, credits: Int, xp: Int): Int
 }
 
 @Dao
@@ -69,4 +72,11 @@ interface SettingDao {
     @Query("SELECT value FROM setting WHERE `key` = :key") suspend fun get(key: String): String?
     @Query("SELECT * FROM setting") fun observeAll(): Flow<List<SettingEntity>>
     @Upsert suspend fun put(e: SettingEntity)
+}
+
+@Dao
+interface BuildingDao {
+    @Query("SELECT * FROM building WHERE planetId = :planet") fun observe(planet: String): Flow<List<BuildingEntity>>
+    @Query("SELECT level FROM building WHERE planetId = :planet AND type = :type") suspend fun level(planet: String, type: String): Int?
+    @Upsert suspend fun upsert(e: BuildingEntity)
 }

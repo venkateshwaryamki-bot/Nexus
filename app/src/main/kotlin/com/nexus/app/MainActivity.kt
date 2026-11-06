@@ -80,7 +80,8 @@ private fun NexusApp(vm: NexusViewModel) {
             Route.PROFILE -> ProfileScreen(vm, onBack = { go(Route.HOME) }, onSettings = { go(Route.SETTINGS) })
             Route.SETTINGS -> SettingsScreen(vm, onBack = { go(Route.PROFILE) }, onReplayIntro = { go(Route.INTRO) }, onDesignSystem = { go(Route.DESIGN_SYSTEM) })
             Route.DESIGN_SYSTEM -> DesignSystemScreen(onBack = { go(Route.SETTINGS) })
-            Route.MISSIONS, Route.PLANETS, Route.RANKINGS, Route.BUILD -> LockedSectorScreen(r, vm, onBack = { go(Route.HOME) })
+            Route.BUILD -> BuildScreen(vm, onBack = { go(Route.HOME) })
+            Route.MISSIONS, Route.PLANETS, Route.RANKINGS -> LockedSectorScreen(r, vm, onBack = { go(Route.HOME) })
         }
     }
 }

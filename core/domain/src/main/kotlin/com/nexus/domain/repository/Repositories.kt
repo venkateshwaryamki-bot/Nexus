@@ -33,3 +33,16 @@ interface ProgressionRepository {
     /** Focus minutes already rewarded on [day] (input to the healthy-play limiter). */
     suspend fun rewardedFocusMinutesOn(day: LocalDate): Int
 }
+
+sealed interface BuildResult {
+    data class Built(val type: com.nexus.domain.civilization.BuildingType, val level: Int, val xp: Int) : BuildResult
+    data class Rejected(val reason: com.nexus.domain.civilization.BuildCheck) : BuildResult
+    /** The building changed since the UI read it (e.g. a double tap); nothing was spent. */
+    data object Stale : BuildResult
+}
+
+interface BuildingRepository {
+    fun observeLevels(): kotlinx.coroutines.flow.Flow<Map<com.nexus.domain.civilization.BuildingType, Int>>
+    /** Atomically checks unlock + funds, spends, and raises the level from [expectedLevel] by one. */
+    suspend fun build(type: com.nexus.domain.civilization.BuildingType, expectedLevel: Int): BuildResult
+}

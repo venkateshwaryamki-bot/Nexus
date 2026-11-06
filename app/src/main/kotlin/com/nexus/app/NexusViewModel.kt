@@ -55,6 +55,16 @@ class NexusViewModel(app: Application) : AndroidViewModel(app) {
     val recentTasks: StateFlow<List<String>> = c.sessions.observeRecentSessions(30)
         .map { l -> l.map { it.task.trim() }.filter { it.isNotEmpty() }.distinct().take(4) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    val buildingLevels: StateFlow<Map<com.nexus.domain.civilization.BuildingType, Int>> =
+        c.buildings.observeLevels().stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
+    private val _lastBuild = MutableStateFlow<com.nexus.domain.repository.BuildResult?>(null)
+    val lastBuild: StateFlow<com.nexus.domain.repository.BuildResult?> = _lastBuild
+    fun build(type: com.nexus.domain.civilization.BuildingType, expectedLevel: Int) = viewModelScope.launch {
+        val r = c.buildings.build(type, expectedLevel)
+        if (r is com.nexus.domain.repository.BuildResult.Built) c.audio.play(com.nexus.app.platform.AudioController.Sfx.ENERGY)
+        if (r !is com.nexus.domain.repository.BuildResult.Stale) _lastBuild.value = r
+    }
+    fun consumeBuild() { _lastBuild.value = null }
     val loaded: StateFlow<Boolean> = player.map { it != null }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     private val _outcome = MutableStateFlow<SessionOutcome?>(null)

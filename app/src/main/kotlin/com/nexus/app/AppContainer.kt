@@ -39,6 +39,7 @@ class AppContainer(
     val progression = RoomProgressionRepository(db)
     val players = PlayerRepository(db)
     val settings = SettingsRepository(db)
+    val buildings = com.nexus.data.RoomBuildingRepository(db)
     val coordinator = FocusCoordinator(sessions, progression, clock)
     val platform = PlatformStatus(context)
     val notifier = FocusNotifier(context)
