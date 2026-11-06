@@ -1,6 +1,7 @@
 package com.nexus.data
 
 import android.content.Context
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -10,8 +11,9 @@ import androidx.room.RoomDatabase
         PlayerEntity::class, SessionEntity::class, RewardLedgerEntity::class,
         DailyStatEntity::class, PlanetProgressEntity::class, SettingEntity::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = true,
+    autoMigrations = [AutoMigration(from = 1, to = 2)], // v2: credits on player + ledger
 )
 abstract class NexusDatabase : RoomDatabase() {
     abstract fun player(): PlayerDao

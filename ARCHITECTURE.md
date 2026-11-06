@@ -100,18 +100,18 @@ The world is a pure function of `WorldState`. It never writes game state. `AppCo
 
 Frame pacing comes from Choreographer with a `maxFps` cap. The surface renders at `renderScale` of native resolution. Geometry rebuilds on a background thread only when `WorldState` changes, and GL resources are recreated in `onSurfaceCreated` after context loss.
 
-## Database schema (v1)
+## Database schema (v2)
 
 | Table | Purpose |
 |---|---|
-| `player` | Single row: username, avatar, energy balance, lifetime energy, total XP, onboarding flag, account type (`guest`) |
+| `player` | Single row: username, avatar, energy balance, lifetime energy, total XP, credits (v2), onboarding flag, account type (`guest`) |
 | `focus_session` | Every session with full timestamp anchors, pause data, interruptions, end reason and anomaly flags |
 | `reward_ledger` | One row per settled session (PK = session id); the audit trail and the duplicate-reward guard |
 | `daily_stat` | Per-day focus, completed and ended-early counts, energy, XP, rewarded minutes (feeds the daily limiter) |
 | `planet_progress` | Per-planet unlock flag and development energy (M1: Nexus Prime) |
 | `setting` | Key-value user settings |
 
-The schema JSON is exported to `core/data/schemas/` for migration testing.
+The schema JSON is exported to `core/data/schemas/`. v1→v2 is a Room `AutoMigration` that adds `credits` (default 0) to `player` and `reward_ledger`. `MigrationTest` checks that a populated v1 database upgrades without losing progress.
 
 ## Backend readiness
 

@@ -1,5 +1,6 @@
 package com.nexus.data
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
@@ -17,6 +18,8 @@ data class PlayerEntity(
     val energyBalance: Long = 0,
     val lifetimeEnergy: Long = 0,
     val totalXp: Long = 0,
+    /** Added in schema v2. Earned only by completed sessions. */
+    @ColumnInfo(defaultValue = "0") val credits: Long = 0,
     val onboardingComplete: Boolean = false,
     /** "guest" in the local-first MVP. Future: "google", "email". */
     val accountType: String = "guest",
@@ -76,6 +79,7 @@ data class RewardLedgerEntity(
     val focusMinutes: Int,
     val dayKey: String,
     val grantedAtWall: Long,
+    @ColumnInfo(defaultValue = "0") val credits: Int = 0,
 )
 
 /** Pre-aggregated daily statistics (local calendar day, ISO yyyy-MM-dd). */

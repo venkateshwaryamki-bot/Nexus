@@ -67,6 +67,12 @@ All values live in `core/domain/reward/RewardPolicy.kt` and `FocusRules.kt`. The
 - Paused time never counts.
 - A reboot can only bridge with wall time up to the planned duration, and that session is flagged.
 
+### Credits (secondary currency, UI v2)
+
+- Earned **only by completing** a session: 1 credit per 5 planned minutes (25 min → 5, 60 min → 12).
+- Never granted for partial sessions. They stop once the daily energy cap (10 h) is reached.
+- Spent on buildings, decorations and cosmetic unlocks (Phase 5+). Energy remains the main currency that restores planets.
+
 ### XP and levels
 
 - Completed session: 2 XP per minute + 25 completion bonus (25 min → 75 XP).

@@ -4,7 +4,9 @@ import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -57,10 +59,11 @@ fun HomeScreen(vm: NexusViewModel, go: (Route) -> Unit) {
                     NexusIconButton(Glyph.BELL, { showOrion = true }, "ORION briefing", size = 44.dp)
                 }
                 Spacer(Modifier.height(Space.sm))
-                Row(horizontalArrangement = Arrangement.spacedBy(Space.xs)) {
+                Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(Space.xs)) {
                     CurrencyChip(Glyph.ENERGY, "%,d".format(p.energyBalance), NexusColors.NeonGreen, contentDescription = "${p.energyBalance} energy")
+                    CurrencyChip(Glyph.CREDIT, "%,d".format(p.credits), NexusColors.Purple, contentDescription = "${p.credits} credits")
                     CurrencyChip(Glyph.STAR, "%,d XP".format(p.totalXp), NexusColors.CosmicGold, contentDescription = "${p.totalXp} experience points")
-                    CurrencyChip(Glyph.FLAME, "${stats?.streak?.current ?: 0} day streak", NexusColors.Purple)
+                    CurrencyChip(Glyph.FLAME, "${stats?.streak?.current ?: 0} day streak", NexusColors.Danger)
                 }
             }
 

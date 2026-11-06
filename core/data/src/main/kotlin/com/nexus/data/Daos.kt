@@ -14,8 +14,8 @@ interface PlayerDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE) suspend fun insertIfAbsent(p: PlayerEntity)
     @Query("UPDATE player SET username = :name, avatarId = :avatar, onboardingComplete = 1 WHERE id = 1")
     suspend fun completeOnboarding(name: String, avatar: Int)
-    @Query("UPDATE player SET energyBalance = energyBalance + :energy, lifetimeEnergy = lifetimeEnergy + :energy, totalXp = totalXp + :xp WHERE id = 1")
-    suspend fun grant(energy: Int, xp: Int): Int
+    @Query("UPDATE player SET energyBalance = energyBalance + :energy, lifetimeEnergy = lifetimeEnergy + :energy, totalXp = totalXp + :xp, credits = credits + :credits WHERE id = 1")
+    suspend fun grant(energy: Int, xp: Int, credits: Int): Int
 }
 
 @Dao

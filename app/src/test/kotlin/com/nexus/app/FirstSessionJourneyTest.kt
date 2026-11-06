@@ -114,22 +114,25 @@ class FirstSessionJourneyTest {
         waitUntilText("Session complete") // chamber completion burst
         shot("09b_chamber_completing")
         advanceUi(2000)
-        waitUntilText("SESSION COMPLETE")
-        advanceUi(1600) // reward counters animate up
+        waitUntilText("Session Complete!")
+        advanceUi(3200) // orchestrated reward entrance
         rule.onNodeWithText("+60").assertExists()
         rule.onNodeWithText("+145").assertExists()
         shot("10_session_complete")
 
         val c = (rule.activity.application as NexusApplication).container
         val player = runBlocking { c.db.player().get()!! }
-        assertEquals(60, player.energyBalance); assertEquals(145, player.totalXp)
+        assertEquals(60, player.energyBalance); assertEquals(145, player.totalXp); assertEquals(12, player.credits)
+        rule.onNodeWithText("+12").assertExists()
+        rule.onNodeWithContentDescription("Nexus Prime evolved from Abandoned Outpost to Small Settlement").assertExists()
         assertEquals("exactly one reward row", 1, runBlocking { c.db.ledger().count() })
 
-        rule.onNodeWithText("Return to Nexus Prime").performScrollTo().performClick(); advanceUi(2000)
+        rule.onNodeWithText("Continue").performClick(); advanceUi(2000)
         rule.onNodeWithContentDescription("Nexus Prime, Small Settlement").assertExists()
         rule.onNodeWithText("60 / 300 energy to Research Colony").assertExists()
         rule.onNodeWithText("+60 energy channelled").assertExists() // reward feedback on the island
-        rule.onNodeWithText("60").assertExists() // energy balance chip
+        rule.onNodeWithContentDescription("60 energy").assertExists()
+        rule.onNodeWithContentDescription("12 credits").assertExists()
         shot("11_home_settlement")
 
         rule.onNode(hasText("Profile") and SemanticsMatcher.expectValue(androidx.compose.ui.semantics.SemanticsProperties.Role, androidx.compose.ui.semantics.Role.Tab))

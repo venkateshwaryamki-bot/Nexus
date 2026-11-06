@@ -7,7 +7,7 @@ import com.nexus.domain.focus.SessionState
 
 enum class RewardKind { COMPLETED, PARTIAL, NONE }
 
-data class Reward(val energy: Int, val xp: Int, val kind: RewardKind, val restLimited: Boolean = false) {
+data class Reward(val energy: Int, val xp: Int, val kind: RewardKind, val restLimited: Boolean = false, val credits: Int = 0) {
     companion object { val None = Reward(0, 0, RewardKind.NONE) }
 }
 
@@ -16,6 +16,10 @@ data class Reward(val energy: Int, val xp: Int, val kind: RewardKind, val restLi
  *
  * Completed session: 1 energy per planned minute, 2 XP per minute + a completion bonus.
  * Ended early: once [FocusRules.partialRewardMinFocusMs] is banked, half energy and 1 XP per focused minute.
+ *
+ * Credits: earned only by *completing* a session — 1 per [minutesPerCredit] planned minutes (25 min → 5).
+ * They are never granted for partial sessions and are not affected by the limiter's energy reduction,
+ * but stop once the daily energy cap is reached.
  *
  * Healthy-play limiter: focus beyond [fullRateDailyMinutes] in one day earns energy at a reduced
  * rate and beyond [dailyEnergyCapMinutes] earns none. Time is still recorded in statistics. This keeps
@@ -30,6 +34,7 @@ data class RewardPolicy(
     val fullRateDailyMinutes: Int = 360,
     val reducedRateFactor: Double = 0.5,
     val dailyEnergyCapMinutes: Int = 600,
+    val minutesPerCredit: Int = 5,
     val rules: FocusRules = FocusRules.Default,
 ) {
     /**
@@ -45,6 +50,7 @@ data class RewardPolicy(
                     xp = session.plannedMinutes * xpPerMinute + completionBonusXp,
                     kind = RewardKind.COMPLETED,
                     restLimited = limited,
+                    credits = if (focusedMinutesEarlierToday >= dailyEnergyCapMinutes) 0 else session.plannedMinutes / minutesPerCredit,
                 )
             }
             SessionState.ABANDONED -> {

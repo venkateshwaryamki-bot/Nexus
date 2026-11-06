@@ -50,7 +50,7 @@ class RoomProgressionRepository(
             if (state == null || !SessionState.valueOf(state).isOpen) {
                 val prior = db.ledger().get(closedSession.id)
                 return@withTransaction SettlementResult(false, prior?.let {
-                    Reward(it.energy, it.xp, RewardKind.valueOf(it.kind), it.restLimited)
+                    Reward(it.energy, it.xp, RewardKind.valueOf(it.kind), it.restLimited, it.credits)
                 } ?: Reward.None)
             }
             db.sessions().update(SessionEntity.from(closedSession))
@@ -58,10 +58,10 @@ class RoomProgressionRepository(
             // Guard 2: ledger primary key. A duplicate insert aborts and rolls back the whole txn.
             db.ledger().insert(
                 RewardLedgerEntity(closedSession.id, reward.energy, reward.xp, reward.kind.name,
-                    reward.restLimited, minutes, day.toString(), now())
+                    reward.restLimited, minutes, day.toString(), now(), reward.credits)
             )
-            if (reward.energy > 0 || reward.xp > 0) {
-                db.player().grant(reward.energy, reward.xp)
+            if (reward.energy > 0 || reward.xp > 0 || reward.credits > 0) {
+                db.player().grant(reward.energy, reward.xp, reward.credits)
                 db.planets().addEnergy(Planets.NEXUS_PRIME, reward.energy)
             }
             val key = day.toString()
@@ -91,6 +91,7 @@ data class PlayerSnapshot(
     val energyBalance: Long,
     val lifetimeEnergy: Long,
     val totalXp: Long,
+    val credits: Long,
     val level: LevelInfo,
     val civilization: CivilizationStatus,
 )
@@ -128,7 +129,7 @@ class PlayerRepository(private val db: NexusDatabase, private val now: () -> Lon
     }
 
     private fun snapshotOf(it: PlayerEntity, planet: PlanetProgressEntity?) =
-        PlayerSnapshot(it.username, it.avatarId, it.onboardingComplete, it.energyBalance, it.lifetimeEnergy, it.totalXp,
+        PlayerSnapshot(it.username, it.avatarId, it.onboardingComplete, it.energyBalance, it.lifetimeEnergy, it.totalXp, it.credits,
             Progression.levelFor(it.totalXp), Civilization.statusFor((planet?.developmentEnergy ?: 0L).toInt()))
 
     fun observeStats(today: () -> LocalDate): Flow<ProfileStats> = combine(

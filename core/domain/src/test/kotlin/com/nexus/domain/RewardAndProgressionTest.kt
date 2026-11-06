@@ -34,6 +34,13 @@ class RewardAndProgressionTest {
         }
     }
 
+    @Test fun `credits are earned only for completed sessions`() {
+        assertEquals(5, policy.rewardFor(completed(25), 0).credits)
+        assertEquals(12, policy.rewardFor(completed(60), 0).credits)
+        assertEquals(0, policy.rewardFor(abandonedAfter(30), 0).credits)
+        assertEquals(0, policy.rewardFor(completed(60), 600).credits) // past the daily cap
+    }
+
     @Test fun `ending early before ten minutes earns nothing`() {
         assertEquals(RewardKind.NONE, policy.rewardFor(abandonedAfter(9), 0).kind)
     }

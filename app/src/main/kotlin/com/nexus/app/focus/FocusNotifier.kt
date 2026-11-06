@@ -75,7 +75,7 @@ class FocusNotifier(private val context: Context) {
     fun showResult(r: ReconcileResult.Closed) {
         val completed = r.session.state == SessionState.COMPLETED
         val text = when {
-            completed -> "+${r.reward.energy} energy · +${r.reward.xp} XP. Nexus Prime grows stronger."
+            completed -> "+${r.reward.energy} energy · +${r.reward.xp} XP · +${r.reward.credits} credits. Nexus Prime grows stronger."
             r.reward.kind == RewardKind.PARTIAL -> "Session ended early · +${r.reward.energy} energy (partial)."
             else -> "Session ended before the 10-minute minimum. No energy this time."
         }

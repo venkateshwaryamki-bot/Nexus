@@ -9,15 +9,16 @@
 | Suite | Tests | Covers |
 |---|---|---|
 | `core:domain` `FocusTimerEngineTest` | 13 | Timestamp-derived timing, exact completion boundary, back-dated completion after process death, pause accounting, pause count limit, pause allowance termination time, **wall-clock manipulation ignored**, **reboot bridging** (running and paused), negative-time clamp, interruption tracking, closed-state transitions rejected |
-| `core:domain` `RewardAndProgressionTest` | 8 | Energy = minutes for 15/25/45/60/90, partial reward threshold and rate, daily healthy-play limiter, XP level curve, ranks, civilization stages (incl. clamping), forgiving streaks with shields |
+| `core:domain` `RewardAndProgressionTest` | 9 | Energy = minutes for 15/25/45/60/90, partial reward threshold and rate, daily healthy-play limiter, XP level curve, ranks, civilization stages (incl. clamping), forgiving streaks with shields |
 | `core:domain` `FocusCoordinatorTest` | 9 | **20 concurrent reconciles → exactly one reward**, idempotent settle, single active session, stale session settled before a new start, end-early partial, end-early after time is up completes instead, persisted pause/resume, pause-limit settlement, daily limiter across sessions |
 | `world:scene` `PlanetSceneTest` | 6 | Deterministic generation, monotonic visible growth across all 5 stages, orbital unlock, quality budgets (< 100k triangles), matrix inverse, no NaN/Inf in vertex data |
+| `core:data` `MigrationTest` (Robolectric + Room MigrationTestHelper) | 1 | A populated v1 database upgrades to v2 with progress intact and credits at 0 |
 | `core:data` `SettlementTest` (Robolectric + real SQLite) | 4 | 10 concurrent reconciles → one ledger row; direct duplicate settle rejected by the DB; **open session survives a new handle (process death)**; daily stats, longest session and streak aggregation |
 | `app` `FirstSessionJourneyTest` (Robolectric + Compose) | 1 (long) | Full first-run journey through the real app: intro → guest registration → AIRA/VYON → home (outpost) → 60-min session → pause/resume (paused time excluded) → completion → **+60 energy / +145 XP, one ledger row** → home shows Small Settlement and the world receives stage 1 plus an energy pulse → profile. Writes 12 screenshots to `app/build/screenshots/`. |
 
 | `app` `DesignSystemTest` (Robolectric + Compose) | 1 | Renders every token and component, checks that bottom-nav selection moves on tap, and saves `ds_reference.png`. |
 
-**Latest result (UI v2 Phase 1): 42/42 passing.**
+**Latest result (UI v2 Phase 4): 44/44 passing.** The journey test now also covers the illustrated home, the chamber controls (pause/resume via icon buttons, energy-core charge), the completion burst, the reward screen (+60 / +145 / +12, evolution) and the credits chip.
 
 ### Shader and render verification (headless GPU path)
 
