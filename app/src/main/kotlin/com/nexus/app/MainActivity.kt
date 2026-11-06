@@ -28,7 +28,7 @@ import com.nexus.app.ui.theme.NexusColors
 import com.nexus.app.ui.theme.NexusPrefs
 import com.nexus.app.ui.theme.NexusTheme
 
-enum class Route { INTRO, ONBOARDING, CHARACTERS, HOME, FOCUS, RESULT, PROFILE, SETTINGS, MISSIONS, PLANETS, RANKINGS, DESIGN_SYSTEM }
+enum class Route { INTRO, ONBOARDING, CHARACTERS, HOME, FOCUS, RESULT, PROFILE, SETTINGS, MISSIONS, PLANETS, RANKINGS, BUILD, DESIGN_SYSTEM }
 
 class MainActivity : ComponentActivity() {
     private val vm: NexusViewModel by viewModels()
@@ -80,7 +80,7 @@ private fun NexusApp(vm: NexusViewModel) {
             Route.PROFILE -> ProfileScreen(vm, onBack = { go(Route.HOME) }, onSettings = { go(Route.SETTINGS) })
             Route.SETTINGS -> SettingsScreen(vm, onBack = { go(Route.PROFILE) }, onReplayIntro = { go(Route.INTRO) }, onDesignSystem = { go(Route.DESIGN_SYSTEM) })
             Route.DESIGN_SYSTEM -> DesignSystemScreen(onBack = { go(Route.SETTINGS) })
-            Route.MISSIONS, Route.PLANETS, Route.RANKINGS -> LockedSectorScreen(r, vm, onBack = { go(Route.HOME) })
+            Route.MISSIONS, Route.PLANETS, Route.RANKINGS, Route.BUILD -> LockedSectorScreen(r, vm, onBack = { go(Route.HOME) })
         }
     }
 }

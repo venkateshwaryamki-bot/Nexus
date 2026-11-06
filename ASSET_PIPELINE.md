@@ -4,7 +4,8 @@
 
 | Asset | Source | Status | Replacement requirement |
 |---|---|---|---|
-| Nexus Prime planet & structures | Procedural (`world/scene/PlanetScene.kt`) | **Placeholder** (polished procedural) | Blender-authored modular kit (tower tiers, 4 building families × 5 levels), glTF 2.0 |
+| Nexus Prime floating island, 5 stages (home) | Scripted Blender scene, Cycles pre-render (`tools/art/nexus_island.py`) → `res/drawable-nodpi/island_stage0-4.webp` (829×954, 312 KB total) | Production-candidate (original, stylised low-poly) | An artist pass can replace the WebPs 1:1 (same size and framing) |
+| Nexus Prime live 3D (optional setting) | Procedural (`world/scene/PlanetScene.kt`) | Placeholder | Kept as an option per TD-010 |
 | Shaders | `world/gles/src/main/assets/shaders/*.vert|frag` | Production-candidate | Extend for normal maps and texture atlases once authored assets arrive |
 | Character portraits (AIRA, VYON, ORION, KAEL, NEXA) | Vector, drawn in code | **Placeholder** | Rigged 3D models + 2D key art matching the identity rules |
 | Explorer insignias (6) | Vector, drawn in code | Final-candidate | Optional premium variants |
@@ -65,3 +66,22 @@ python3 tools/audio/generate_sfx.py
 ```bash
 node tools/render-harness/render.mjs
 ```
+
+## 2.5D pre-rendered art (UI v2)
+
+The illustrations are rendered offline from Blender scripts, so the art is reproducible, reviewable in code, and costs nothing at runtime beyond decoding a WebP.
+
+```bash
+pip install bpy numpy pillow
+```
+
+Use Python 3.13, ideally in a virtual environment.
+
+```bash
+BPY_PYTHON=/path/to/venv/bin/python tools/art/build_assets.sh
+```
+
+- Each stage renders at 1080² with Cycles (64 samples + OpenImageDenoise), using a transparent film and the AgX view transform.
+- Bloom comes from a second, emission-only render (all non-emissive surfaces turned matte black), blurred at two radii and added back. Only real light sources glow.
+- All stages share one crop box, so the island never shifts when the stage changes.
+- Placement is deterministic and fixed across stages: the city grows rather than reshuffles.

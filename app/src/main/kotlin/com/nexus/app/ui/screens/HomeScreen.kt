@@ -1,24 +1,18 @@
 package com.nexus.app.ui.screens
 
 import androidx.compose.animation.*
-import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -29,14 +23,13 @@ import com.nexus.app.Route
 import com.nexus.app.nexus
 import com.nexus.app.platform.AudioController
 import com.nexus.app.ui.components.*
-import com.nexus.app.ui.theme.NexusColors
-import com.nexus.app.ui.theme.NexusType
+import com.nexus.app.ui.theme.*
 import com.nexus.domain.focus.SessionEvaluation
 import com.nexus.world.scene.WorldHost
 import com.nexus.world.scene.WorldState
 import kotlinx.coroutines.delay
 
-/** Screen 04 — Main home: the living 3D headquarters of Nexus Prime with a game HUD. */
+/** Screen 04 — Home (Universe): the player's headquarters, resources and next action (blueprint v2). */
 @Composable
 fun HomeScreen(vm: NexusViewModel, go: (Route) -> Unit) {
     val player by vm.player.collectAsStateWithLifecycle()
@@ -45,156 +38,149 @@ fun HomeScreen(vm: NexusViewModel, go: (Route) -> Unit) {
     val open by vm.openSession.collectAsStateWithLifecycle()
     val p = player ?: return
     val civ = p.civilization
-    var worldView by remember { mutableStateOf<WorldHost?>(null) }
-    val worldFactory = androidx.compose.ui.platform.LocalContext.current.nexus.worldHostFactory
-    var gainText by remember { mutableStateOf<Int?>(null) }
-    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    var pulseKey by remember { mutableIntStateOf(0) }
+    var gain by remember { mutableStateOf<Int?>(null) }
+    var showOrion by remember { mutableStateOf(false) }
 
-    // --- 3D world (fills the screen) ---------------------------------------------------------
+    // Reward feedback when arriving from a completed session.
+    LaunchedEffect(Unit) {
+        delay(600)
+        val amount = vm.consumePulse()
+        if (amount > 0) { pulseKey++; vm.audio.play(AudioController.Sfx.ENERGY); gain = amount; delay(2800); gain = null }
+    }
+
     Box(Modifier.fillMaxSize()) {
-        AndroidView(factory = { ctx -> worldFactory(ctx).also { worldView = it as WorldHost } }, modifier = Modifier.fillMaxSize(),
-            update = { view -> val v = view as WorldHost
-                v.setQuality(settings.quality)
-                v.setWorldState(WorldState(development = civ.overallDevelopment, stage = civ.stage.ordinal))
-            })
-        DisposableEffect(lifecycle, worldView) {
-            val v = worldView
-            val obs = LifecycleEventObserver { _, e ->
-                when (e) { Lifecycle.Event.ON_RESUME -> v?.onHostResume(); Lifecycle.Event.ON_PAUSE -> v?.onHostPause(); else -> {} }
+        StarfieldBackground()
+        Column(Modifier.fillMaxSize().systemBarsPadding()) {
+            Column(Modifier.padding(horizontal = Space.gutter).padding(top = Space.xs)) {
+                PlayerTopBar(p.avatarId, p.username, "Lv. ${p.level.level} · ${p.level.rank.title}", onProfile = { go(Route.PROFILE) }) {
+                    NexusIconButton(Glyph.BELL, { showOrion = true }, "ORION briefing", size = 44.dp)
+                }
+                Spacer(Modifier.height(Space.sm))
+                Row(horizontalArrangement = Arrangement.spacedBy(Space.xs)) {
+                    CurrencyChip(Glyph.ENERGY, "%,d".format(p.energyBalance), NexusColors.NeonGreen, contentDescription = "${p.energyBalance} energy")
+                    CurrencyChip(Glyph.STAR, "%,d XP".format(p.totalXp), NexusColors.CosmicGold, contentDescription = "${p.totalXp} experience points")
+                    CurrencyChip(Glyph.FLAME, "${stats?.streak?.current ?: 0} day streak", NexusColors.Purple)
+                }
             }
-            if (v != null && lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) v.onHostResume()
-            lifecycle.addObserver(obs)
-            onDispose { lifecycle.removeObserver(obs); v?.onHostPause() }
-        }
-        // Reward feedback: energy pulse across the planet + floating "+N" readout.
-        LaunchedEffect(worldView) {
-            val v = worldView ?: return@LaunchedEffect
-            delay(700)
-            val amount = vm.consumePulse()
-            if (amount > 0) { v.playEnergyPulse(amount); vm.audio.play(AudioController.Sfx.ENERGY); gainText = amount; delay(2600); gainText = null }
-        }
-        // Vignettes keep HUD legible over the world.
-        Box(Modifier.fillMaxWidth().height(200.dp).background(Brush.verticalGradient(listOf(Color(0xE6061321), Color.Transparent))))
-        Box(Modifier.fillMaxWidth().height(260.dp).align(Alignment.BottomCenter).background(Brush.verticalGradient(listOf(Color.Transparent, Color(0xF2061321)))))
 
-        Column(Modifier.fillMaxSize().systemBarsPadding().padding(horizontal = 16.dp)) {
-            TopHud(vm, onProfile = { go(Route.PROFILE) })
-            Spacer(Modifier.height(12.dp))
-            PlanetStatusPanel(civ.stage.title, civ.nextStage?.title, civ.progressToNext, civ.developmentEnergy, civ.nextStage?.requiredEnergy)
-            Spacer(Modifier.weight(1f))
-            AnimatedVisibility(gainText != null, enter = fadeIn() + slideInVertically { it }, exit = fadeOut() + slideOutVertically { -it }) {
-                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            // Hero: the headquarters (illustrated by default; the live 3D world is an option in Settings).
+            Box(Modifier.weight(1f).fillMaxWidth().clickable(remember { MutableInteractionSource() }, null) { go(Route.PLANETS) }, contentAlignment = Alignment.Center) {
+                if (settings.liveWorld) LiveWorld(civ.overallDevelopment, civ.stage.ordinal, settings, pulseKey)
+                else NexusIsland(civ.stage.ordinal, civ.progressToNext, civ.stage.title, Modifier.fillMaxSize().padding(horizontal = Space.xs), pulseKey)
+                androidx.compose.animation.AnimatedVisibility(gain != null, Modifier.align(Alignment.BottomCenter).padding(bottom = Space.xs),
+                    enter = fadeIn() + slideInVertically { it / 2 }, exit = fadeOut()) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        NexusIcon(Glyph.ENERGY, NexusColors.NeonGreen, size = 28.dp)
-                        Text("+${gainText ?: 0} ENERGY CHANNELLED", style = NexusType.Title, color = NexusColors.NeonGreen)
+                        NexusIcon(Glyph.ENERGY, NexusColors.NeonGreen, size = 24.dp)
+                        Spacer(Modifier.width(6.dp))
+                        Text("+${gain ?: 0} energy channelled", style = NexusType.Heading, color = NexusColors.NeonGreen)
                     }
                 }
             }
-            Spacer(Modifier.height(12.dp))
-            val today = stats?.recentDays?.firstOrNull { it.dayKey == java.time.LocalDate.now().toString() }
-            OrionTip(open != null, today?.completedSessions ?: 0, settings.dailyGoalSessions, stats?.streak?.current ?: 0)
-            Spacer(Modifier.height(12.dp))
-            if (open != null) ActiveSessionBanner(vm, onOpen = { go(Route.FOCUS) })
-            else NexusPrimaryButton("Enter Focus Chamber", { go(Route.FOCUS) }, Modifier.fillMaxWidth(), leading = Glyph.FOCUS)
-            Spacer(Modifier.height(12.dp))
-            BottomDock(go)
-            Spacer(Modifier.height(8.dp))
+
+            Column(Modifier.padding(horizontal = Space.gutter), verticalArrangement = Arrangement.spacedBy(Space.sm)) {
+                NexusCard(Modifier.fillMaxWidth(), onClick = { go(Route.PLANETS) }) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Column(Modifier.weight(1f)) {
+                            Text("NEXUS PRIME", style = NexusType.Heading, color = NexusColors.TextPrimary)
+                            Text(civ.stage.title, style = NexusType.Small, color = NexusColors.ElectricCyan)
+                        }
+                        Text("Lv. ${civ.stage.ordinal + 1}", style = NexusType.Numeric, color = NexusColors.CosmicGold)
+                    }
+                    Spacer(Modifier.height(Space.xs))
+                    LabeledProgress(
+                        if (civ.nextStage != null) "${civ.developmentEnergy} / ${civ.nextStage!!.requiredEnergy} energy to ${civ.nextStage!!.title}" else "Fully restored",
+                        civ.progressToNext,
+                    )
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(Space.xs)) {
+                    QuickActionTile(Glyph.BUILD, "Build", { go(Route.BUILD) }, Modifier.weight(1f))
+                    QuickActionTile(Glyph.MISSIONS, "Missions", { go(Route.MISSIONS) }, Modifier.weight(1f), NexusColors.Purple)
+                    QuickActionTile(Glyph.PLANETS, "Planets", { go(Route.PLANETS) }, Modifier.weight(1f), NexusColors.CosmicGold)
+                }
+                if (open != null) ActiveSessionButton(vm, onOpen = { go(Route.FOCUS) })
+                else NexusButton("Start Focus", { go(Route.FOCUS) }, Modifier.fillMaxWidth(), leading = Glyph.PLAY)
+            }
+            Spacer(Modifier.height(Space.xs))
+            NexusBottomBar(NavDestination.UNIVERSE, { d ->
+                when (d) {
+                    NavDestination.UNIVERSE -> {}
+                    NavDestination.MISSIONS -> go(Route.MISSIONS)
+                    NavDestination.FOCUS -> go(Route.FOCUS)
+                    NavDestination.ARENA -> go(Route.RANKINGS)
+                    NavDestination.PROFILE -> go(Route.PROFILE)
+                }
+            }, Modifier.padding(horizontal = Space.xs), focusActive = open != null)
         }
+
+        if (showOrion) OrionBriefing(vm, onDismiss = { showOrion = false })
     }
 }
 
+/** ORION's daily briefing, opened from the bell: real targets from today's data. */
 @Composable
-private fun TopHud(vm: NexusViewModel, onProfile: () -> Unit) {
-    val p = vm.player.collectAsStateWithLifecycle().value ?: return
-    Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-        Row(Modifier.clip(RoundedCornerShape(30.dp)).clickable(onClick = onProfile).padding(end = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            AvatarEmblem(p.avatarId, size = 46.dp)
-            Spacer(Modifier.width(10.dp))
-            Column {
-                Text(p.username, style = NexusType.Heading, color = Color.White, maxLines = 1)
-                Text("LV ${p.level.level} · ${p.level.rank.title.uppercase()}", style = NexusType.Label, color = NexusColors.ElectricCyan)
-                Spacer(Modifier.height(3.dp))
-                EnergyBar(p.level.progress, Modifier.width(110.dp), height = 4.dp)
-            }
-        }
-        Spacer(Modifier.weight(1f))
-        Row(Modifier.clip(RoundedCornerShape(20.dp)).background(Color(0x9910283F)).border(1.dp, NexusColors.PanelBorder, RoundedCornerShape(20.dp))
-            .padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            NexusIcon(Glyph.ENERGY, NexusColors.NeonGreen, size = 18.dp)
-            Spacer(Modifier.width(6.dp))
-            Text("%,d".format(p.energyBalance), style = NexusType.Numeric, color = Color.White)
-        }
-    }
-}
-
-@Composable
-private fun PlanetStatusPanel(stage: String, next: String?, progress: Float, energy: Int, nextReq: Int?) {
-    GlassPanel(Modifier.fillMaxWidth(), padding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f)) {
-                SectionLabel("Nexus Prime · Headquarters", color = NexusColors.TextSecondary)
-                Text(stage.uppercase(), style = NexusType.Title.copy(fontSize = 22.sp), color = Color.White)
-            }
-            Column(horizontalAlignment = Alignment.End) {
-                Text(if (nextReq != null) "$energy / $nextReq" else "$energy", style = NexusType.Numeric.copy(fontSize = 15.sp), color = NexusColors.ElectricCyan)
-                Text("ENERGY CHANNELLED", style = NexusType.Label.copy(fontSize = 10.sp), color = NexusColors.TextMuted)
-            }
-        }
-        Spacer(Modifier.height(8.dp))
-        EnergyBar(progress)
-        Spacer(Modifier.height(6.dp))
-        Text(if (next != null) "Next: $next" else "Fully restored. New worlds await.", style = NexusType.Small, color = NexusColors.TextSecondary)
-    }
-}
-
-@Composable
-private fun OrionTip(sessionActive: Boolean, doneToday: Int, goal: Int, streak: Int) {
+private fun OrionBriefing(vm: NexusViewModel, onDismiss: () -> Unit) {
+    val settings by vm.settings.collectAsStateWithLifecycle()
+    val stats by vm.stats.collectAsStateWithLifecycle()
+    val open by vm.openSession.collectAsStateWithLifecycle()
+    val today = stats?.recentDays?.firstOrNull { it.dayKey == java.time.LocalDate.now().toString() }
+    val done = today?.completedSessions ?: 0; val goal = settings.dailyGoalSessions; val streak = stats?.streak?.current ?: 0
     val msg = when {
-        sessionActive -> "Session in progress. Energy is accumulating. Stay with it, Explorer."
-        doneToday == 0 && streak > 0 -> "Your streak is $streak days. One session today keeps it alive."
-        doneToday == 0 -> "Daily target: $goal sessions. Start with one. Every minute of focus is one unit of energy."
-        doneToday < goal -> "$doneToday of $goal sessions done today. One more and Nexus Prime hits today's target."
-        else -> "Daily target reached ($doneToday/$goal). Great work. Rest is part of the mission too."
+        open != null -> "A session is in progress. Energy is accumulating. Stay with it, Explorer."
+        done == 0 && streak > 0 -> "Your streak is $streak days. One session today keeps it alive."
+        done == 0 -> "Daily target: $goal sessions. Start with one. Every minute of focus is one unit of energy."
+        done < goal -> "$done of $goal sessions done today. One more and Nexus Prime hits today's target."
+        else -> "Daily target reached ($done/$goal). Great work. Rest is part of the mission too."
     }
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        CharacterPortrait(Character.ORION, size = 54.dp)
-        Spacer(Modifier.width(6.dp))
-        GlassPanel(Modifier.weight(1f), accent = Character.ORION.accent, padding = PaddingValues(horizontal = 12.dp, vertical = 9.dp), brackets = false, corner = 14.dp) {
-            Text(msg, style = NexusType.Small, color = NexusColors.TextPrimary)
-        }
-    }
-}
-
-@Composable
-private fun ActiveSessionBanner(vm: NexusViewModel, onOpen: () -> Unit) {
-    val s = vm.openSession.collectAsStateWithLifecycle().value ?: return
-    var now by remember { mutableLongStateOf(0L) }
-    LaunchedEffect(s) { while (true) { now++; delay(1000) } }
-    val ev = remember(s, now) { vm.engine.evaluate(s, vm.clock) }
-    val (label, remaining) = when (ev) {
-        is SessionEvaluation.Running -> "FOCUS ACTIVE" to ev.remainingMs
-        is SessionEvaluation.Paused -> "PAUSED" to ev.remainingMs
-        else -> "COMPLETING" to 0L
-    }
-    NexusPrimaryButton("$label · ${formatMs(remaining)} — return", onOpen, Modifier.fillMaxWidth(), leading = Glyph.CLOCK)
-}
-
-@Composable
-private fun BottomDock(go: (Route) -> Unit) {
-    val items = listOf(Triple(Glyph.MISSIONS, "Missions", Route.MISSIONS), Triple(Glyph.PLANETS, "Planets", Route.PLANETS),
-        Triple(Glyph.RANKINGS, "Rankings", Route.RANKINGS), Triple(Glyph.PROFILE, "Profile", Route.PROFILE))
-    GlassPanel(Modifier.fillMaxWidth(), padding = PaddingValues(vertical = 8.dp, horizontal = 4.dp), brackets = false, corner = 20.dp) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-            items.forEach { (g, label, r) ->
-                Column(Modifier.clip(RoundedCornerShape(12.dp)).clickable { go(r) }.padding(horizontal = 12.dp, vertical = 6.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally) {
-                    NexusIcon(g, NexusColors.TextSecondary, size = 22.dp)
-                    Spacer(Modifier.height(3.dp))
-                    Text(label.uppercase(), style = NexusType.Label.copy(fontSize = 11.sp), color = NexusColors.TextSecondary)
+    Box(Modifier.fillMaxSize().background(Color(0x99030A12)).clickable(remember { MutableInteractionSource() }, null, onClick = onDismiss)) {
+        NexusCard(Modifier.align(Alignment.TopCenter).systemBarsPadding().padding(Space.gutter).padding(top = 52.dp).fillMaxWidth(), tone = CardTone.Highlight) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                CharacterPortrait(Character.ORION, size = 64.dp)
+                Spacer(Modifier.width(Space.sm))
+                Column(Modifier.weight(1f)) {
+                    Text("ORION · Operations", style = NexusType.Label, color = NexusColors.ElectricCyan)
+                    Spacer(Modifier.height(4.dp))
+                    Text(msg, style = NexusType.Body, color = NexusColors.TextPrimary)
                 }
             }
+            Spacer(Modifier.height(Space.sm))
+            LabeledProgress("Today's sessions", done.toFloat() / goal.coerceAtLeast(1), valueText = "$done / $goal",
+                colors = listOf(NexusColors.NeonGreen, NexusColors.Turquoise))
         }
     }
+}
+
+@Composable
+private fun ActiveSessionButton(vm: NexusViewModel, onOpen: () -> Unit) {
+    val s = vm.openSession.collectAsStateWithLifecycle().value ?: return
+    var tick by remember { mutableLongStateOf(0L) }
+    LaunchedEffect(s) { while (true) { tick++; delay(1000) } }
+    val ev = remember(s, tick) { vm.engine.evaluate(s, vm.clock) }
+    val (label, remaining) = when (ev) {
+        is SessionEvaluation.Running -> "Focusing" to ev.remainingMs
+        is SessionEvaluation.Paused -> "Paused" to ev.remainingMs
+        else -> "Completing" to 0L
+    }
+    NexusButton("$label · ${formatMs(remaining)}", onOpen, Modifier.fillMaxWidth(), leading = Glyph.CLOCK, trailing = Glyph.ARROW_RIGHT)
+}
+
+/** Optional live 3D world (Settings → Home planet → Live 3D), via the engine-agnostic WorldHost. */
+@Composable
+private fun LiveWorld(development: Float, stage: Int, settings: com.nexus.app.AppSettings, pulseKey: Int) {
+    val factory = LocalContext.current.nexus.worldHostFactory
+    var host by remember { mutableStateOf<WorldHost?>(null) }
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    AndroidView(factory = { ctx -> factory(ctx).also { host = it as WorldHost } }, modifier = Modifier.fillMaxSize(), update = { v ->
+        val h = v as WorldHost; h.setQuality(settings.quality); h.setWorldState(WorldState(development = development, stage = stage))
+    })
+    DisposableEffect(lifecycle, host) {
+        val h = host
+        val obs = LifecycleEventObserver { _, e -> when (e) { Lifecycle.Event.ON_RESUME -> h?.onHostResume(); Lifecycle.Event.ON_PAUSE -> h?.onHostPause(); else -> {} } }
+        if (h != null && lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) h.onHostResume()
+        lifecycle.addObserver(obs)
+        onDispose { lifecycle.removeObserver(obs); h?.onHostPause() }
+    }
+    LaunchedEffect(pulseKey, host) { if (pulseKey > 0) host?.playEnergyPulse(60) }
 }
 
 fun formatMs(ms: Long): String {

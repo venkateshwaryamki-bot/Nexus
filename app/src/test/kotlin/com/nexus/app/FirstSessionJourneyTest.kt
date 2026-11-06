@@ -80,12 +80,13 @@ class FirstSessionJourneyTest {
         rule.onNodeWithText("SKIP").performClick(); advanceUi(1500)
 
         // Home: abandoned outpost, zero energy.
-        rule.onNodeWithText("ABANDONED OUTPOST").assertExists()
+        rule.onNodeWithContentDescription("Nexus Prime, Abandoned Outpost").assertExists()
+        rule.onNodeWithText("Abandoned Outpost").assertExists()
         rule.onNodeWithText("Nova").assertExists()
-        assertEquals(0, FakeWorldView.states.last().stage)
+        rule.onNodeWithText("0 / 60 energy to Small Settlement").assertExists()
         shot("06_home_outpost")
 
-        rule.onNodeWithText("Enter Focus Chamber").performClick(); advanceUi(800)
+        rule.onNodeWithText("Start Focus").performClick(); advanceUi(800)
         rule.onNode(hasSetTextAction()).performTextInput("Read chapter 4")
         rule.onNodeWithText("60 MIN").performClick(); advanceUi(300)
         shot("07_focus_setup")
@@ -117,14 +118,14 @@ class FirstSessionJourneyTest {
         assertEquals("exactly one reward row", 1, runBlocking { c.db.ledger().count() })
 
         rule.onNodeWithText("Return to Nexus Prime").performScrollTo().performClick(); advanceUi(2000)
-        rule.onNodeWithText("SMALL SETTLEMENT").assertExists()
-        assertEquals(1, FakeWorldView.states.last().stage)
-        assertTrue(FakeWorldView.states.last().development > 0f)
-        advanceUi(800)
-        assertEquals(listOf(60), FakeWorldView.pulses)
+        rule.onNodeWithContentDescription("Nexus Prime, Small Settlement").assertExists()
+        rule.onNodeWithText("60 / 300 energy to Research Colony").assertExists()
+        rule.onNodeWithText("+60 energy channelled").assertExists() // reward feedback on the island
+        rule.onNodeWithText("60").assertExists() // energy balance chip
         shot("11_home_settlement")
 
-        rule.onNodeWithText("PROFILE").performClick(); advanceUi(1200)
+        rule.onNode(hasText("Profile") and SemanticsMatcher.expectValue(androidx.compose.ui.semantics.SemanticsProperties.Role, androidx.compose.ui.semantics.Role.Tab))
+            .performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick); advanceUi(1200)
         shot("12_profile")
     }
 

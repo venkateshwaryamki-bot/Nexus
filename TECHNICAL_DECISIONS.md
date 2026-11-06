@@ -128,3 +128,5 @@ The cloud sandbox used for M1 rate-limits Maven Central. A **machine-local** Gra
 **Typography change.** Headings use Space Grotesk and body/labels use Inter, per the blueprint. Rajdhani was removed.
 
 **Palette change.** Tokens moved to the blueprint values (background `#06111E`, surface `#0A1B2B`, card `#102638`, primary `#20D6EA`, success `#37E6A0`, secondary `#9275FF`, muted `#92A6B8`). The hex values were read off the blueprint image, so they are approximate.
+
+**Art production (Phase 2).** Illustrations are scripted Blender scenes pre-rendered to WebP (`tools/art`). That's original work, needs no third-party licences, and stays tiny (Nexus Prime: 5 stages, 312 KB). The app shows the stage sprite with Compose layer animation (float, aura, motes, reward shockwave) and swaps sprites with a crossfade when the stage changes.

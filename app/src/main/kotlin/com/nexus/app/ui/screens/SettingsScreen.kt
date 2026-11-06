@@ -52,6 +52,11 @@ fun SettingsScreen(vm: NexusViewModel, onBack: () -> Unit, onReplayIntro: () -> 
                     }
                 }
             }
+            Section("Home planet") {
+                Toggle("Live 3D planet (experimental)", s.liveWorld) { vm.putSetting("live_world", it) }
+                Text("Off: the illustrated planet (recommended, lighter on battery). On: the real-time 3D renderer using the quality setting above.",
+                    style = NexusType.Small, color = NexusColors.TextMuted)
+            }
             Section("Focus") {
                 Text("Default duration: ${s.defaultMinutes} min", style = NexusType.BodyStrong, color = Color.White)
                 Slider(s.defaultMinutes.toFloat(), { vm.putSetting("default_minutes", (it / 5).toInt() * 5) }, valueRange = 5f..180f,

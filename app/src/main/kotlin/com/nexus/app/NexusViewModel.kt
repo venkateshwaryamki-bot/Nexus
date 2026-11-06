@@ -18,6 +18,8 @@ data class AppSettings(
     val quality: GraphicsQuality = GraphicsQuality.MEDIUM,
     val defaultMinutes: Int = 25,
     val dailyGoalSessions: Int = 2,
+    /** Home planet rendering: false = illustrated 2.5D (default), true = live 3D (GLES WorldHost). */
+    val liveWorld: Boolean = false,
 ) {
     companion object {
         fun from(m: Map<String, String>) = AppSettings(
@@ -27,6 +29,7 @@ data class AppSettings(
             quality = m["quality"]?.let { runCatching { GraphicsQuality.valueOf(it) }.getOrNull() } ?: GraphicsQuality.MEDIUM,
             defaultMinutes = m["default_minutes"]?.toIntOrNull() ?: 25,
             dailyGoalSessions = m["daily_goal"]?.toIntOrNull() ?: 2,
+            liveWorld = m["live_world"]?.toBoolean() ?: false,
         )
     }
 }

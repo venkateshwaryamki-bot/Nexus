@@ -22,6 +22,7 @@ import com.nexus.app.ui.theme.NexusType
 fun LockedSectorScreen(route: Route, vm: NexusViewModel, onBack: () -> Unit) {
     val (title, body) = when (route) {
         Route.MISSIONS -> "Missions" to "Daily, weekly and special missions with rewards. Arrives in the next update (Milestone 2). Sessions you complete now are already recorded."
+        Route.BUILD -> "Build" to "Construct and upgrade Energy Reactors, Research Labs, Spaceports and more with your energy. Each upgrade visibly changes Nexus Prime. Arrives in the planet development update (Phase 5)."
         Route.PLANETS -> "Galaxy map" to "Explore Orion, Aether, Titan and Eclipse. Each world unlocks through your focus progress. The galaxy map arrives in Milestone 2; the worlds themselves follow in Milestone 3."
         else -> "Rankings" to "Friends, weekly and global rankings need NEXUS online services, which arrive in Milestone 4. NEXUS will never present simulated players as real rankings."
     }

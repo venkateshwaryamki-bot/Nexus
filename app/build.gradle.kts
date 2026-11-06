@@ -33,6 +33,9 @@ android {
     testOptions {
         unitTests.isIncludeAndroidResources = true
         unitTests.all { test ->
+            // Each UI test class gets a fresh JVM: Robolectric + process-wide singletons (main dispatcher,
+            // ProcessLifecycleOwner) otherwise leak between full-app tests.
+            test.forkEvery = 1
             providers.gradleProperty("robolectricRepoUrl").orNull?.let { test.systemProperty("robolectric.dependency.repo.url", it) }
             test.systemProperty("nexus.screenshotDir", layout.buildDirectory.dir("screenshots").get().asFile.absolutePath)
         }
