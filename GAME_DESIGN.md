@@ -136,6 +136,22 @@ Buildings are bought with the energy **balance** and **credits**. Lifetime energ
 
 Each construction level gives 20 × level XP. Purchases are one database transaction: the level must still match what the UI showed (a double tap builds once), funds are checked with a guarded UPDATE, and the level rises by one.
 
+### The Grove (UI v2 Phase 6, implemented)
+
+Trees grow **only from completed focus sessions**, so the grove is a visible record of finished work.
+
+| Stage | Completed minutes (per tree) |
+|---|---|
+| Seed | 0 (planted) |
+| Sprout | 25 |
+| Young Tree | 75 |
+| Mature Tree | 150 |
+| Ancient Tree | 300 (bioluminescent) |
+
+- Tree 1 is a seed from day one, and a new seed is planted every 150 completed minutes, up to 10 trees.
+- Each tree is fed by the minutes completed since it was planted.
+- The grove is derived from the reward ledger (the sum of completed-session minutes), not stored, so it can never drift out of sync with real sessions.
+
 ### Missions (M2)
 
 - **Daily:** complete 1 session (20 XP), focus 60 min (40 XP), complete 2 sessions (30 XP), no abandoned sessions today (25 XP).

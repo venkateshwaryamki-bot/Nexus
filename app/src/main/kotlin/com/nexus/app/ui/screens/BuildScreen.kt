@@ -36,6 +36,7 @@ fun BuildScreen(vm: NexusViewModel, onBack: () -> Unit) {
     val p = vm.player.collectAsStateWithLifecycle().value ?: return
     val levels by vm.buildingLevels.collectAsStateWithLifecycle()
     val lastBuild by vm.lastBuild.collectAsStateWithLifecycle()
+    val grove by vm.grove.collectAsStateWithLifecycle()
     var selected by remember { mutableStateOf(BuildingType.REACTOR) }
     val stage = p.civilization.stage.ordinal
     var justBuilt by remember { mutableStateOf<Pair<BuildingType, Int>?>(null) }
@@ -62,7 +63,7 @@ fun BuildScreen(vm: NexusViewModel, onBack: () -> Unit) {
                 }
             }
             Box(Modifier.fillMaxWidth().height(300.dp), contentAlignment = Alignment.Center) {
-                NexusIsland(stage, levels, p.civilization.stage.title, Modifier.fillMaxSize(), justBuilt = justBuilt, ghost = ghost)
+                NexusIsland(stage, levels, p.civilization.stage.title, Modifier.fillMaxSize(), justBuilt = justBuilt, ghost = ghost, grove = grove)
                 androidx.compose.animation.AnimatedVisibility(banner != null, Modifier.align(Alignment.BottomCenter), enter = fadeIn() + slideInVertically { it }, exit = fadeOut()) {
                     StatusPill(banner ?: "", NexusColors.CosmicGold, Glyph.BUILD)
                 }
@@ -72,6 +73,7 @@ fun BuildScreen(vm: NexusViewModel, onBack: () -> Unit) {
                     BuildingCard(t, levels[t] ?: 0, stage, p.energyBalance, p.credits, selected == t, onSelect = { selected = t },
                         onBuild = { selected = t; vm.build(t, levels[t] ?: 0) })
                 }
+                item { GroveCard(grove) }
                 item {
                     NexusCard(Modifier.fillMaxWidth()) {
                         Text("Nexus Tower", style = NexusType.BodyStrong, color = NexusColors.TextPrimary)
@@ -140,5 +142,34 @@ private fun LevelPips(level: Int) {
         repeat(BuildingType.MAX_LEVEL) { i ->
             Box(Modifier.size(7.dp).clip(CircleShape).background(if (i < level) NexusColors.CosmicGold else NexusColors.Divider))
         }
+    }
+}
+
+/** The grove: grows only from completed focus. Shows the five stages and what the youngest tree needs. */
+@Composable
+private fun GroveCard(grove: List<com.nexus.domain.civilization.GroveTree>) {
+    val growing = grove.lastOrNull { it.next != null } ?: grove.last()
+    NexusCard(Modifier.fillMaxWidth(), tone = CardTone.Success) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            NexusIcon(Glyph.TREE, NexusColors.NeonGreen, size = 20.dp); Spacer(Modifier.width(6.dp))
+            Text("The Grove", style = NexusType.BodyStrong, color = NexusColors.TextPrimary, modifier = Modifier.weight(1f))
+            StatusPill("${grove.size} / ${com.nexus.domain.civilization.Grove.MAX_TREES} trees", NexusColors.NeonGreen)
+        }
+        Text("Trees grow only from completed focus sessions. A new seed is planted every ${com.nexus.domain.civilization.Grove.PLANT_EVERY / 60.0} hours of focus.".replace(".0 ", " "),
+            style = NexusType.Small, color = NexusColors.TextSecondary)
+        Spacer(Modifier.height(Space.xs))
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Bottom) {
+            com.nexus.domain.civilization.TreeStage.entries.forEachIndexed { i, st ->
+                val reached = growing.stage.ordinal >= i
+                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
+                    IslandLayout.trees.getOrNull(i)?.let { Image(painterResource(it.res), null, Modifier.height((26 + i * 7).dp), contentScale = ContentScale.Fit, alpha = if (reached) 1f else 0.3f) }
+                    Text(st.title.substringBefore(" Tree"), style = NexusType.Caption, color = if (growing.stage.ordinal == i) NexusColors.NeonGreen else NexusColors.TextMuted)
+                }
+            }
+        }
+        Spacer(Modifier.height(Space.xs))
+        val next = growing.next
+        LabeledProgress(if (next != null) "Tree ${growing.index + 1}: ${growing.minutesToNext} more focus minutes to ${next.title}" else "Every tree is ancient",
+            growing.progressToNext, colors = listOf(NexusColors.NeonGreen, NexusColors.Turquoise))
     }
 }

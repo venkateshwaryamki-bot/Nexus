@@ -44,6 +44,9 @@ interface LedgerDao {
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insert(e: RewardLedgerEntity)
     @Query("SELECT * FROM reward_ledger WHERE sessionId = :id") suspend fun get(id: String): RewardLedgerEntity?
     @Query("SELECT COUNT(*) FROM reward_ledger") suspend fun count(): Int
+    /** Completed-session focus minutes (feeds the grove). */
+    @Query("SELECT COALESCE(SUM(focusMinutes), 0) FROM reward_ledger WHERE kind = 'COMPLETED'") fun observeCompletedMinutes(): Flow<Int>
+    @Query("SELECT COALESCE(SUM(focusMinutes), 0) FROM reward_ledger WHERE kind = 'COMPLETED'") suspend fun completedMinutes(): Int
 }
 
 @Dao

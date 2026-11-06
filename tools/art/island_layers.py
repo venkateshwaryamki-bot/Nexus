@@ -26,28 +26,9 @@ A = P.parse_args()
 os.makedirs(A.out, exist_ok=True)
 ONLY = set(filter(None, A.only.split(",")))
 
-# Building slots (x, y on the island top). Front arc + one back-left; never directly behind the tower.
-SLOTS = {
-    "reactor":   (-2.45, -0.3),
-    "colony":    (-1.45, -1.8),
-    "lab":       (0.15, -2.3),
-    "comms":     (1.65, -1.6),
-    "spaceport": (2.45, -0.05),
-    "defense":   (-1.85, 1.25),
-}
+from island_geo import SLOTS, R, rim_radius, ground_z, surface, CAM_LOC, CAM_TARGET, ORTHO_SCALE
 TYPES = list(SLOTS)
-R = 3.2
 CYAN, GREEN = "#20D6EA", "#37E6A0"
-
-def rim_radius(th):
-    return R * (1 + 0.10 * math.sin(3 * th + 0.7) + 0.06 * math.sin(5 * th + 2.1) + 0.04 * math.sin(9 * th))
-
-def ground_z(x, y):
-    r = math.hypot(x, y)
-    return 0.18 * noise.noise(Vector((x * 0.45, y * 0.45, 1.3))) * min(1, r / 1.2) + 0.08 * (1 - min(1, r / R))
-
-def surface(x, y):
-    return Vector((x, y, ground_z(x, y)))
 
 # --------------------------------------------------------------------------------------------- scene
 def new_scene(stage):
@@ -64,10 +45,10 @@ def new_scene(stage):
     light("AREA", (4, 5, 3), 900, (0.25, 0.85, 1.0), rot=(math.radians(-60), math.radians(30), math.radians(140)), size=6)
     light("AREA", (0, -9, -3), 380, (0.55, 0.7, 1.0), rot=(math.radians(110), 0, 0), size=8)
     light("AREA", (-6, -4, -4), 250, (0.55, 0.45, 1.0), rot=(math.radians(120), 0, math.radians(-50)), size=6)
-    d = bpy.data.cameras.new("cam"); d.type = "ORTHO"; d.ortho_scale = 9.4
+    d = bpy.data.cameras.new("cam"); d.type = "ORTHO"; d.ortho_scale = ORTHO_SCALE
     cam = bpy.data.objects.new("cam", d); sc.collection.objects.link(cam); sc.camera = cam
-    cam.location = (0, -14, 5.2); cam.rotation_mode = "QUATERNION"
-    cam.rotation_quaternion = (Vector((0, 0, -0.35)) - cam.location).to_track_quat("-Z", "Y")
+    cam.location = CAM_LOC; cam.rotation_mode = "QUATERNION"
+    cam.rotation_quaternion = (Vector(CAM_TARGET) - cam.location).to_track_quat("-Z", "Y")
     return sc, cam
 
 def materials(stage):
@@ -328,6 +309,7 @@ def render_layer(name, show, catcher, cam):
     return list(box)
 
 def depth_of(cam, p):
+    bpy.context.view_layer.update()
     return -(cam.matrix_world.inverted() @ Vector(p)).z
 
 manifest = {"res": A.res, "layers": {}}

@@ -80,7 +80,7 @@ class FirstSessionJourneyTest {
         rule.onNodeWithText("SKIP").performClick(); advanceUi(1500)
 
         // Home: abandoned outpost, zero energy.
-        rule.onNodeWithContentDescription("Nexus Prime, Abandoned Outpost").assertExists()
+        rule.onNodeWithContentDescription("Nexus Prime, Abandoned Outpost, 1 tree").assertExists() // the day-one seed
         rule.onNodeWithText("Abandoned Outpost").assertExists()
         rule.onNodeWithText("Nova").assertExists()
         rule.onNodeWithText("0 / 60 energy to Small Settlement").assertExists()
@@ -125,10 +125,11 @@ class FirstSessionJourneyTest {
         assertEquals(60, player.energyBalance); assertEquals(145, player.totalXp); assertEquals(12, player.credits)
         rule.onNodeWithText("+12").assertExists()
         rule.onNodeWithContentDescription("Nexus Prime evolved from Abandoned Outpost to Small Settlement").assertExists()
+        rule.onNodeWithText("Tree 1 grew: Seed → Sprout").assertExists() // 60 completed minutes
         assertEquals("exactly one reward row", 1, runBlocking { c.db.ledger().count() })
 
         rule.onNodeWithText("Continue").performClick(); advanceUi(2000)
-        rule.onNodeWithContentDescription("Nexus Prime, Small Settlement").assertExists()
+        rule.onNodeWithContentDescription("Nexus Prime, Small Settlement, 1 tree").assertExists()
         rule.onNodeWithText("60 / 300 energy to Research Colony").assertExists()
         rule.onNodeWithText("+60 energy channelled").assertExists() // reward feedback on the island
         rule.onNodeWithContentDescription("60 energy").assertExists()
@@ -142,7 +143,7 @@ class FirstSessionJourneyTest {
         rule.onAllNodesWithText("Build").filterToOne(hasClickAction() and hasAnyAncestor(hasText("Energy Reactor"))).performClick()
         waitUntil { rule.onAllNodesWithContentDescription("30 energy available").fetchSemanticsNodes().isNotEmpty() }
         waitUntil { rule.onAllNodesWithContentDescription("Level 1 of 3").fetchSemanticsNodes().isNotEmpty() }
-        rule.onNodeWithContentDescription("Nexus Prime, Small Settlement, 1 structures").assertExists()
+        rule.onNodeWithContentDescription("Nexus Prime, Small Settlement, 1 structure, 1 tree").assertExists()
         advanceUi(800)
         shot("11c_build_after")
         assertEquals(165, runBlocking { c.db.player().get()!!.totalXp }) // 145 + 20 for the reactor

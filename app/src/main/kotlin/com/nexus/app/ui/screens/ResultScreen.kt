@@ -141,6 +141,20 @@ fun ResultScreen(vm: NexusViewModel, onContinue: () -> Unit) {
                     }
                 }
 
+                // Grove growth from this session.
+                val growth = com.nexus.domain.civilization.Grove.growth(o.completedMinutesAfter - (if (completed) (s.bankedFocusMs / 60_000).toInt() else 0), o.completedMinutesAfter)
+                if (growth.isNotEmpty()) NexusCard(Modifier.fillMaxWidth().alpha(phase(0.7f, 0.2f)), tone = CardTone.Success) {
+                    growth.take(3).forEach { g ->
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 2.dp)) {
+                            com.nexus.app.ui.art.IslandLayout.trees.getOrNull(g.to.ordinal)?.let { Image(painterResource(it.res), null, Modifier.size(36.dp)) }
+                            Spacer(Modifier.width(Space.sm))
+                            val from = g.from
+                            Text(if (from == null) "A new seed was planted in the grove" else "Tree ${g.index + 1} grew: ${from.title} → ${g.to.title}",
+                                style = NexusType.BodyStrong, color = NexusColors.NeonGreen)
+                        }
+                    }
+                }
+
                 // Honest notes about what happened.
                 val notes = buildList {
                     add(when {

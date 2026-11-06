@@ -41,7 +41,7 @@ data class AppSettings(
  * Outcome shown on the result screen. [after] is read from the database right after the settlement
  * committed; "before" values are derived by subtracting the reward, so nothing races the DB flows.
  */
-data class SessionOutcome(val result: ReconcileResult.Closed, val after: PlayerSnapshot?)
+data class SessionOutcome(val result: ReconcileResult.Closed, val after: PlayerSnapshot?, val completedMinutesAfter: Int = 0)
 
 class NexusViewModel(app: Application) : AndroidViewModel(app) {
     private val c = app.nexus
@@ -55,6 +55,8 @@ class NexusViewModel(app: Application) : AndroidViewModel(app) {
     val recentTasks: StateFlow<List<String>> = c.sessions.observeRecentSessions(30)
         .map { l -> l.map { it.task.trim() }.filter { it.isNotEmpty() }.distinct().take(4) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    val grove: StateFlow<List<com.nexus.domain.civilization.GroveTree>> =
+        c.players.observeGrove().stateIn(viewModelScope, SharingStarted.Eagerly, com.nexus.domain.civilization.Grove.compute(0))
     val buildingLevels: StateFlow<Map<com.nexus.domain.civilization.BuildingType, Int>> =
         c.buildings.observeLevels().stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
     private val _lastBuild = MutableStateFlow<com.nexus.domain.repository.BuildResult?>(null)
@@ -83,7 +85,7 @@ class NexusViewModel(app: Application) : AndroidViewModel(app) {
     init {
         viewModelScope.launch {
             c.focus.unseenResult.filterNotNull().collect { r ->
-                _outcome.value = SessionOutcome(r, c.players.snapshot())
+                _outcome.value = SessionOutcome(r, c.players.snapshot(), c.players.completedMinutes())
                 if (r.reward.energy > 0) _pendingPulse.value = r.reward.energy
                 c.audio.play(com.nexus.app.platform.AudioController.Sfx.COMPLETE)
                 c.focus.acknowledgeResult()

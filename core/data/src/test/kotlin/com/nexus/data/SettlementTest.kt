@@ -83,5 +83,8 @@ class SettlementTest {
         assertEquals(25 * MINUTE, stats.longestSessionMs)
         assertEquals(1, stats.streak.current)
         assertEquals(56, db.player().get()!!.energyBalance) // 25 + 25 + 6
+        // The grove counts only completed minutes (2 × 25), not the ended-early 12.
+        assertEquals(50, players.completedMinutes())
+        assertEquals(com.nexus.domain.civilization.TreeStage.SPROUT, players.observeGrove().first()[0].stage)
     }
 }

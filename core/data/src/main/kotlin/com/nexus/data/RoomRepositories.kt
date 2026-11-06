@@ -123,6 +123,10 @@ class PlayerRepository(private val db: NexusDatabase, private val now: () -> Lon
     fun observePlayer(): Flow<PlayerSnapshot?> =
         db.player().observe().combine(db.planets().observe(Planets.NEXUS_PRIME)) { p, planet -> p?.let { snapshotOf(it, planet) } }
 
+    fun observeGrove(): Flow<List<com.nexus.domain.civilization.GroveTree>> =
+        db.ledger().observeCompletedMinutes().map { com.nexus.domain.civilization.Grove.compute(it) }
+    suspend fun completedMinutes(): Int = db.ledger().completedMinutes()
+
     /** Reads the committed state directly (no flow latency); used right after a settlement. */
     suspend fun snapshot(): PlayerSnapshot? = db.withTransaction {
         db.player().get()?.let { snapshotOf(it, db.planets().get(Planets.NEXUS_PRIME)) }

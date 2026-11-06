@@ -26,8 +26,8 @@ keeping the existing timer, rewards, persistence and the WorldHost boundary inta
 | 3 | Focus Chamber: 4 pre-rendered chamber environments with nebula portals, frame-accurate progress ring (ticks, glow head, gold when paused), floating energy core that charges with progress, Ambient / Pause-Resume / Sound controls, looping ambient soundscape, recent-task picker, environment thumbnails, energy charging card, completion burst | ✅ Done |
 | 4 | Session completion & reward animations: rotating rays, crystal burst with overshoot, staggered Energy / XP / Credits counters, Nexus Prime card with island thumbnail and animated before→after progress, level-up and evolution banners. New **Credits** currency (DB v2 auto-migration, tested) | ✅ Done |
 | 5 | Planet development: layered 2.5D island (terrain + tower per stage, 6 buildings × 3 levels, contact shadows, depth-sorted), Build screen with ghost preview of the next level, costs in energy + credits, unlock by stage, construction animation, XP for building; DB v3 | ✅ Done |
-| 6 | Tree growth: Seed → Sprout → Young → Mature → Ancient (5 separate assets, scale + sway animation) | ⏳ Next |
-| 7 | Missions & achievements (functional, data-driven) | Planned |
+| 6 | Tree growth: 5 separately rendered tree stages (Seed → Sprout → Young → Mature → Ancient, the last bioluminescent), 10 grove slots placed by camera projection and depth-sorted with buildings, sway + growth pop; grove grows only from completed focus minutes (derived from the ledger); Grove card on Build; growth lines in the debrief | ✅ Done |
+| 7 | Missions & achievements (functional, data-driven) | ⏳ Next |
 | 8 | Galaxy & unlockable planets (Orion Lv 5, Aether Lv 10, Titan Lv 15, Eclipse Lv 20) | Planned |
 | 9 | Character illustrations & interactions | Planned |
 | 10 | Profile, statistics, final polish, device performance pass | Planned |

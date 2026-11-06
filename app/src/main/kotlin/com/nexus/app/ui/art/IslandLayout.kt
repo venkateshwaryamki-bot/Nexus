@@ -5,41 +5,68 @@ import com.nexus.app.R
 
 /**
  * One pre-rendered island layer. Position and size are fractions of the composition frame
- * (797×923 px at render scale). [depth] is the camera distance: larger = further = drawn first.
+ * (841×924 px at render scale). [depth] is the camera distance: larger = further = drawn first.
  */
 data class IslandLayer(val res: Int, val x: Float, val y: Float, val w: Float, val h: Float, val depth: Float)
 
+/** A tree sprite: size as frame fractions, anchor (ground point) as fractions of the sprite. */
+data class TreeArt(val res: Int, val w: Float, val h: Float, val anchorX: Float, val anchorY: Float)
+
+/** A grove slot: ground point as frame fractions + camera depth. */
+data class TreeSlot(val x: Float, val y: Float, val depth: Float)
+
 object IslandLayout {
     /** Width / height of the composition frame. */
-    const val ASPECT = 0.86349f
+    const val ASPECT = 0.91017f
     val layers: Map<String, IslandLayer> = mapOf(
-        "b_colony_1" to IslandLayer(R.drawable.isl_b_colony_1, 0.18946f, 0.46479f, 0.15809f, 0.11051f, 13.2655f),
-        "b_colony_2" to IslandLayer(R.drawable.isl_b_colony_2, 0.13802f, 0.46046f, 0.20954f, 0.11376f, 13.2655f),
-        "b_colony_3" to IslandLayer(R.drawable.isl_b_colony_3, 0.13802f, 0.40412f, 0.30991f, 0.17551f, 13.2655f),
-        "b_comms_1" to IslandLayer(R.drawable.isl_b_comms_1, 0.66625f, 0.41170f, 0.21706f, 0.12568f, 13.4179f),
-        "b_comms_2" to IslandLayer(R.drawable.isl_b_comms_2, 0.64617f, 0.38787f, 0.27854f, 0.14951f, 13.4179f),
-        "b_comms_3" to IslandLayer(R.drawable.isl_b_comms_3, 0.64617f, 0.34020f, 0.33124f, 0.19718f, 13.4179f),
-        "b_defense_1" to IslandLayer(R.drawable.isl_b_defense_1, 0.15809f, 0.31961f, 0.18695f, 0.10726f, 16.1274f),
-        "b_defense_2" to IslandLayer(R.drawable.isl_b_defense_2, 0.15809f, 0.28927f, 0.23714f, 0.13868f, 16.1274f),
-        "b_defense_3" to IslandLayer(R.drawable.isl_b_defense_3, 0.08783f, 0.25785f, 0.35759f, 0.20693f, 16.1274f),
-        "b_lab_1" to IslandLayer(R.drawable.isl_b_lab_1, 0.43413f, 0.43120f, 0.26851f, 0.14518f, 12.7691f),
-        "b_lab_2" to IslandLayer(R.drawable.isl_b_lab_2, 0.39398f, 0.41062f, 0.33752f, 0.16576f, 12.7691f),
-        "b_lab_3" to IslandLayer(R.drawable.isl_b_lab_3, 0.39398f, 0.34886f, 0.43287f, 0.22752f, 12.7691f),
-        "b_reactor_1" to IslandLayer(R.drawable.isl_b_reactor_1, 0.05270f, 0.39653f, 0.15935f, 0.09426f, 14.6468f),
-        "b_reactor_2" to IslandLayer(R.drawable.isl_b_reactor_2, 0.03639f, 0.39437f, 0.22710f, 0.09967f, 14.6468f),
-        "b_reactor_3" to IslandLayer(R.drawable.isl_b_reactor_3, 0.03262f, 0.28061f, 0.36136f, 0.21668f, 14.6468f),
-        "b_spaceport_1" to IslandLayer(R.drawable.isl_b_spaceport_1, 0.75157f, 0.40087f, 0.18444f, 0.07367f, 14.8526f),
-        "b_spaceport_2" to IslandLayer(R.drawable.isl_b_spaceport_2, 0.75157f, 0.31961f, 0.23965f, 0.15493f, 14.8526f),
-        "b_spaceport_3" to IslandLayer(R.drawable.isl_b_spaceport_3, 0.75157f, 0.31961f, 0.23965f, 0.15493f, 14.8526f),
-        "base_s0" to IslandLayer(R.drawable.isl_base_s0, 0.02886f, 0.31528f, 0.97114f, 0.68472f, 1000000.0000f),
-        "base_s1" to IslandLayer(R.drawable.isl_base_s1, 0.00000f, 0.31528f, 1.00000f, 0.65655f, 1000000.0000f),
-        "base_s2" to IslandLayer(R.drawable.isl_base_s2, 0.02886f, 0.31528f, 0.97114f, 0.65655f, 1000000.0000f),
-        "base_s3" to IslandLayer(R.drawable.isl_base_s3, 0.02886f, 0.31528f, 0.97114f, 0.65655f, 1000000.0000f),
-        "base_s4" to IslandLayer(R.drawable.isl_base_s4, 0.02886f, 0.31528f, 0.97114f, 0.65655f, 1000000.0000f),
-        "tower_s0" to IslandLayer(R.drawable.isl_tower_s0, 0.34881f, 0.29144f, 0.39398f, 0.19718f, 14.9310f),
-        "tower_s1" to IslandLayer(R.drawable.isl_tower_s1, 0.04768f, 0.17443f, 0.80928f, 0.42145f, 14.9310f),
-        "tower_s2" to IslandLayer(R.drawable.isl_tower_s2, 0.04768f, 0.10726f, 0.94103f, 0.47237f, 14.9310f),
-        "tower_s3" to IslandLayer(R.drawable.isl_tower_s3, 0.04768f, 0.05417f, 0.94103f, 0.54280f, 14.9310f),
-        "tower_s4" to IslandLayer(R.drawable.isl_tower_s4, 0.03011f, 0.00000f, 0.95859f, 0.59588f, 14.9310f),
+        "b_colony_1" to IslandLayer(R.drawable.isl_b_colony_1, 0.17955f, 0.46429f, 0.14982f, 0.11039f, 13.2655f),
+        "b_colony_2" to IslandLayer(R.drawable.isl_b_colony_2, 0.13080f, 0.45996f, 0.19857f, 0.11364f, 13.2655f),
+        "b_colony_3" to IslandLayer(R.drawable.isl_b_colony_3, 0.13080f, 0.40368f, 0.29370f, 0.17532f, 13.2655f),
+        "b_comms_1" to IslandLayer(R.drawable.isl_b_comms_1, 0.63139f, 0.41126f, 0.20571f, 0.12554f, 13.4179f),
+        "b_comms_2" to IslandLayer(R.drawable.isl_b_comms_2, 0.61237f, 0.38745f, 0.26397f, 0.14935f, 13.4179f),
+        "b_comms_3" to IslandLayer(R.drawable.isl_b_comms_3, 0.61237f, 0.33983f, 0.31391f, 0.19697f, 13.4179f),
+        "b_defense_1" to IslandLayer(R.drawable.isl_b_defense_1, 0.14982f, 0.31926f, 0.17717f, 0.10714f, 16.1274f),
+        "b_defense_2" to IslandLayer(R.drawable.isl_b_defense_2, 0.14982f, 0.28896f, 0.22473f, 0.13853f, 16.1274f),
+        "b_defense_3" to IslandLayer(R.drawable.isl_b_defense_3, 0.08323f, 0.25758f, 0.33888f, 0.20671f, 16.1274f),
+        "b_lab_1" to IslandLayer(R.drawable.isl_b_lab_1, 0.41141f, 0.43074f, 0.25446f, 0.14502f, 12.7691f),
+        "b_lab_2" to IslandLayer(R.drawable.isl_b_lab_2, 0.37337f, 0.41017f, 0.31986f, 0.16558f, 12.7691f),
+        "b_lab_3" to IslandLayer(R.drawable.isl_b_lab_3, 0.37337f, 0.34848f, 0.41023f, 0.22727f, 12.7691f),
+        "b_reactor_1" to IslandLayer(R.drawable.isl_b_reactor_1, 0.04994f, 0.39610f, 0.15101f, 0.09416f, 14.6468f),
+        "b_reactor_2" to IslandLayer(R.drawable.isl_b_reactor_2, 0.03448f, 0.39394f, 0.21522f, 0.09957f, 14.6468f),
+        "b_reactor_3" to IslandLayer(R.drawable.isl_b_reactor_3, 0.03092f, 0.28030f, 0.34245f, 0.21645f, 14.6468f),
+        "b_spaceport_1" to IslandLayer(R.drawable.isl_b_spaceport_1, 0.71225f, 0.40043f, 0.17479f, 0.07359f, 14.8526f),
+        "b_spaceport_2" to IslandLayer(R.drawable.isl_b_spaceport_2, 0.71225f, 0.31926f, 0.22711f, 0.15476f, 14.8526f),
+        "b_spaceport_3" to IslandLayer(R.drawable.isl_b_spaceport_3, 0.71225f, 0.31926f, 0.22711f, 0.15476f, 14.8526f),
+        "base_s0" to IslandLayer(R.drawable.isl_base_s0, 0.02735f, 0.31494f, 0.92033f, 0.68398f, 1000000.0000f),
+        "base_s1" to IslandLayer(R.drawable.isl_base_s1, 0.00000f, 0.31494f, 0.94768f, 0.65584f, 1000000.0000f),
+        "base_s2" to IslandLayer(R.drawable.isl_base_s2, 0.02735f, 0.31494f, 0.92033f, 0.65584f, 1000000.0000f),
+        "base_s3" to IslandLayer(R.drawable.isl_base_s3, 0.02735f, 0.31494f, 0.92033f, 0.65584f, 1000000.0000f),
+        "base_s4" to IslandLayer(R.drawable.isl_base_s4, 0.02735f, 0.31494f, 0.92033f, 0.65584f, 1000000.0000f),
+        "tower_s0" to IslandLayer(R.drawable.isl_tower_s0, 0.33056f, 0.29113f, 0.37337f, 0.19697f, 14.9310f),
+        "tower_s1" to IslandLayer(R.drawable.isl_tower_s1, 0.04518f, 0.17424f, 0.76694f, 0.42100f, 14.9310f),
+        "tower_s2" to IslandLayer(R.drawable.isl_tower_s2, 0.04518f, 0.10714f, 0.89180f, 0.47186f, 14.9310f),
+        "tower_s3" to IslandLayer(R.drawable.isl_tower_s3, 0.04518f, 0.05411f, 0.89180f, 0.54221f, 14.9310f),
+        "tower_s4" to IslandLayer(R.drawable.isl_tower_s4, 0.02854f, 0.00000f, 0.90844f, 0.59524f, 14.9310f),
+    )
+    /** Seed, Sprout, Young Tree, Mature Tree, Ancient Tree. */
+    val trees: List<TreeArt> = listOf(
+        TreeArt(R.drawable.isl_tree_seed, 0.14507f, 0.06277f, 0.58197f, 0.61409f),
+        TreeArt(R.drawable.isl_tree_sprout, 0.17717f, 0.08658f, 0.47651f, 0.72022f),
+        TreeArt(R.drawable.isl_tree_young, 0.13555f, 0.10823f, 0.23684f, 0.97617f),
+        TreeArt(R.drawable.isl_tree_mature, 0.15933f, 0.16667f, 0.38060f, 0.97804f),
+        TreeArt(R.drawable.isl_tree_ancient, 0.21046f, 0.25216f, 0.49153f, 0.96402f),
+    )
+    /** Grove slots in planting order. */
+    val treeSlots: List<TreeSlot> = listOf(
+        TreeSlot(0.16908f, 0.50601f, 13.9041f),
+        TreeSlot(0.68620f, 0.47963f, 14.2493f),
+        TreeSlot(0.89257f, 0.43886f, 15.3424f),
+        TreeSlot(0.83185f, 0.40834f, 15.8775f),
+        TreeSlot(0.75014f, 0.38344f, 16.3831f),
+        TreeSlot(0.68203f, 0.35592f, 17.0082f),
+        TreeSlot(0.36540f, 0.35741f, 17.0399f),
+        TreeSlot(0.54837f, 0.35737f, 17.1245f),
+        TreeSlot(0.22279f, 0.35064f, 17.1164f),
+        TreeSlot(0.46056f, 0.35165f, 17.2338f),
     )
 }
