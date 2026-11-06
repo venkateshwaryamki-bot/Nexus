@@ -20,6 +20,8 @@ data class AppSettings(
     val dailyGoalSessions: Int = 2,
     /** Home planet rendering: false = illustrated 2.5D (default), true = live 3D (GLES WorldHost). */
     val liveWorld: Boolean = false,
+    /** Ambient soundscape in the Focus Chamber. */
+    val ambientSound: Boolean = false,
 ) {
     companion object {
         fun from(m: Map<String, String>) = AppSettings(
@@ -30,6 +32,7 @@ data class AppSettings(
             defaultMinutes = m["default_minutes"]?.toIntOrNull() ?: 25,
             dailyGoalSessions = m["daily_goal"]?.toIntOrNull() ?: 2,
             liveWorld = m["live_world"]?.toBoolean() ?: false,
+            ambientSound = m["ambient_sound"]?.toBoolean() ?: false,
         )
     }
 }
@@ -48,6 +51,10 @@ class NexusViewModel(app: Application) : AndroidViewModel(app) {
     val settings: StateFlow<AppSettings> = c.settings.observe().map(AppSettings::from)
         .onEach { c.audio.enabled = it.audio }.stateIn(viewModelScope, SharingStarted.Eagerly, AppSettings())
     val openSession: StateFlow<FocusSession?> = c.focus.observeOpenSession().stateIn(viewModelScope, SharingStarted.Eagerly, null)
+    /** Distinct recent task names, newest first (task picker suggestions). */
+    val recentTasks: StateFlow<List<String>> = c.sessions.observeRecentSessions(30)
+        .map { l -> l.map { it.task.trim() }.filter { it.isNotEmpty() }.distinct().take(4) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     val loaded: StateFlow<Boolean> = player.map { it != null }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     private val _outcome = MutableStateFlow<SessionOutcome?>(null)

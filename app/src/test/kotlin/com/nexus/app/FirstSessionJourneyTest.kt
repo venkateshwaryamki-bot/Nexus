@@ -88,24 +88,32 @@ class FirstSessionJourneyTest {
 
         rule.onNodeWithText("Start Focus").performClick(); advanceUi(800)
         rule.onNode(hasSetTextAction()).performTextInput("Read chapter 4")
-        rule.onNodeWithText("60 MIN").performClick(); advanceUi(300)
+        rule.onNodeWithText("60 min").performClick(); advanceUi(300)
         shot("07_focus_setup")
-        rule.onNodeWithText("Begin focus · 60 min").performScrollTo().performClick()
-        waitUntilText("REMAINING")
+        rule.onNodeWithText("Begin focus · 60 min").performClick()
+        waitUntilText("Focus Session")
         clock.advance(17 * MINUTE + 25_000); advanceUi(600)
         rule.onNodeWithText("42:35").assertExists()
         shot("08_chamber_running")
 
-        rule.onNodeWithText("Pause (3 left)").performClick()
-        waitUntilText("PAUSED")
+        val coreDesc = rule.onNode(hasContentDescription("Energy core", substring = true)).fetchSemanticsNode()
+            .config[androidx.compose.ui.semantics.SemanticsProperties.ContentDescription].first()
+        assertTrue("core charge reflects focus progress: $coreDesc", coreDesc.contains("2") && coreDesc.endsWith("% charged"))
+        println("core: $coreDesc")
+        rule.onNodeWithContentDescription("Pause").performClick()
+        waitUntilText("Paused")
         clock.advance(2 * MINUTE); advanceUi(600)
         rule.onNodeWithText("42:35").assertExists() // paused time does not count
         shot("09_chamber_paused")
-        rule.onNodeWithText("Resume").performClick()
-        waitUntilText("REMAINING")
+        rule.onNodeWithText("Pause allowance left 13:00 · pauses used 1/3").assertExists()
+        rule.onNodeWithContentDescription("Resume").performClick()
+        waitUntilText("Focus Session")
 
         // The phone sits on the desk for the rest of the hour.
-        clock.advance(43 * MINUTE); advanceUi(1000)
+        clock.advance(43 * MINUTE); advanceUi(600)
+        waitUntilText("Session complete") // chamber completion burst
+        shot("09b_chamber_completing")
+        advanceUi(2000)
         waitUntilText("SESSION COMPLETE")
         advanceUi(1600) // reward counters animate up
         rule.onNodeWithText("+60").assertExists()

@@ -10,7 +10,9 @@
 | Character portraits (AIRA, VYON, ORION, KAEL, NEXA) | Vector, drawn in code | **Placeholder** | Rigged 3D models + 2D key art matching the identity rules |
 | Explorer insignias (6) | Vector, drawn in code | Final-candidate | Optional premium variants |
 | Planet orbs (galaxy previews) | Vector, drawn in code | **Placeholder** | Rendered planet thumbnails per world |
-| Focus environments (4) | 2D Canvas scenes | **Placeholder** | Illustrated or 3D-rendered loops (static rendering budget) |
+| Focus Chamber environments (4) | Scripted Blender scenes (`tools/art/focus_chamber.py`): portal with procedural nebula, pillars, lanterns, pedestal, themed props → `chamber_*.webp` (1080×1920, ~100 KB each) + `chamber_thumb_*.webp` | Production-candidate | Layout contract: portal centre ≈ 36% of height, pedestal ≈ 70% |
+| Energy core | Blender crystal with orbit rings (`focus_chamber.py --core`) → `energy_core.webp` | Production-candidate | |
+| Ambient focus soundscape | Synthesised, seamless 24 s loop (`generate_sfx.py`) → `ambient_focus.ogg` (134 KB) | Placeholder | Composed ambient bed, −20 LUFS, seamless loop |
 | UI glyphs | Vector, drawn in code | Final-candidate | |
 | Launcher icon | Vector drawable (adaptive + monochrome) | Final-candidate | Designer pass |
 | Fonts | Space Grotesk, Inter (OFL 1.1, Inter subset to Latin) | Final | |

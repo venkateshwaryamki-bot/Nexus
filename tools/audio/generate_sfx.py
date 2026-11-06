@@ -45,4 +45,20 @@ save('session_complete.wav', x * env(len(t), 0.005, 0.4))
 d = 0.7; t = np.arange(int(SR * d)) / SR
 f = 300 + 900 * (t / d) ** 1.5
 save('energy_gain.wav', np.sin(2 * np.pi * np.cumsum(f) / SR) * env(len(t), 0.01, 0.35) * 0.8)
+# Ambient focus loop (~24 s, seamless): slow detuned pads + airy filtered noise, no rhythm, very low
+# contrast so it supports concentration. Loops cleanly because every partial completes whole cycles.
+d = 24.0; t = np.arange(int(SR * d)) / SR
+def cyc(f): return round(f * d) / d  # snap to whole cycles over the loop
+pad = sum(np.sin(2 * np.pi * cyc(f) * t + ph) * g for f, ph, g in [(110, 0, .5), (110.5, 1, .45), (164.8, 2, .3), (220, .4, .18), (329.6, 1.3, .08)])
+lfo = 0.75 + 0.25 * np.sin(2 * np.pi * cyc(1 / 8) * t)
+air = np.convolve(rng.standard_normal(len(t)), np.ones(300) / 300, 'same')
+air = air - np.convolve(air, np.ones(30) / 30, 'same') * 0  # keep soft
+air *= 0.6 * (0.7 + 0.3 * np.sin(2 * np.pi * cyc(1 / 12) * t + 1))
+x = pad * lfo * 0.6 + air * 3
+n = int(0.05 * SR); x[:n] = x[:n] * np.linspace(0, 1, n) + x[-n:] * np.linspace(1, 0, n)  # crossfade seam
+save('ambient_focus.wav', x[:-n] * 0.5)
+# Ship the loop as Ogg Vorbis (~10x smaller). Needs `pip install soundfile`.
+import soundfile as sf
+wav = os.path.join(OUT, 'ambient_focus.wav'); data, rate = sf.read(wav)
+sf.write(os.path.join(OUT, 'ambient_focus.ogg'), data, rate, format='OGG', subtype='VORBIS'); os.remove(wav)
 print('ok')

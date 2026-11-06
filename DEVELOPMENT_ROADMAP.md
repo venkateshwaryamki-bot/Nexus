@@ -23,8 +23,8 @@ keeping the existing timer, rewards, persistence and the WorldHost boundary inta
 |---|---|---|
 | 1 | Design system & reusable components: blueprint tokens, Inter + Space Grotesk, button/icon-button/card/chip/pill/progress/mission/quick-action/planet-row/top-bar/bottom-nav, in-app reference screen | ✅ Done |
 | 2 | Home dashboard: 2.5D Nexus Prime floating island (5 pre-rendered stages, crossfade, float, aura, motes, reward shockwave), resource chips, planet card, quick actions, ORION briefing on the bell, new bottom nav (Universe · Missions · Focus · Arena · Profile); live 3D kept as a Settings option | ✅ Done |
-| 3 | Focus Chamber: animated ring countdown, glowing energy core, ambient/sound controls, task picker, energy charging | ⏳ Next |
-| 4 | Session completion & reward animations (crystal burst, counters, progress 35%→40%), credits currency | Planned |
+| 3 | Focus Chamber: 4 pre-rendered chamber environments with nebula portals, frame-accurate progress ring (ticks, glow head, gold when paused), floating energy core that charges with progress, Ambient / Pause-Resume / Sound controls, looping ambient soundscape, recent-task picker, environment thumbnails, energy charging card, completion burst | ✅ Done |
+| 4 | Session completion & reward animations (crystal burst, counters, progress 35%→40%), credits currency | ⏳ Next |
 | 5 | Planet development visuals: Outpost → Research Lab → Tech Hub (layered 2.5D asset sets) | Planned |
 | 6 | Tree growth: Seed → Sprout → Young → Mature → Ancient (5 separate assets, scale + sway animation) | Planned |
 | 7 | Missions & achievements (functional, data-driven) | Planned |

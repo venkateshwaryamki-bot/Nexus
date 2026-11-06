@@ -25,3 +25,23 @@ for s, im in enumerate(ims):
     print(f"island_stage{s}.webp {c.size[0]}x{c.size[1]}")
 PY
 du -ch "$RES"/island_stage*.webp | tail -1
+
+# Focus Chamber environments (portrait backdrops, opaque) and the energy core sprite.
+if [[ "${1:-}" != "--skip-render" ]]; then
+  for env in command_centre observatory aether_forest titan_station; do
+    "$PY" tools/art/focus_chamber.py --env "$env" --out "$OUT/chamber_$env.png" --res 1080 --samples 64 > /dev/null 2>&1
+  done
+  "$PY" tools/art/focus_chamber.py --core --out "$OUT/energy_core.png" --res 512 --samples 64 > /dev/null 2>&1
+fi
+python3 - "$OUT" "$RES" <<'PY'
+import sys
+from PIL import Image
+out, res = sys.argv[1], sys.argv[2]
+for env in ["command_centre", "observatory", "aether_forest", "titan_station"]:
+    im = Image.open(f"{out}/chamber_{env}.png").convert("RGB")
+    im.save(f"{res}/chamber_{env}.webp", "WEBP", quality=82, method=6)
+    # Small thumbnail for the environment picker (avoids decoding 4 full backdrops).
+    im.resize((im.width // 4, im.height // 4), Image.LANCZOS).save(f"{res}/chamber_thumb_{env}.webp", "WEBP", quality=80, method=6)
+Image.open(f"{out}/energy_core.png").save(f"{res}/energy_core.webp", "WEBP", quality=88, method=6)
+PY
+du -ch "$RES"/chamber_*.webp "$RES"/energy_core.webp | tail -1
